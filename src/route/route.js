@@ -1,28 +1,27 @@
 import VueRouter from 'vue-router'
 
-const Home = () => import(/* webpackChunkName: "homePage" */ '../pages/home/home.vue')
-const My = () => import(/* webpackChunkName: "myPage" */ '../pages/my/my.vue')
-const MyChild1 = () => import(/* webpackChunkName: "myPage" */ '../pages/my/myChild1.vue')
-const MyChild2 = () => import(/* webpackChunkName: "myPage" */ '../pages/my/MyChild2.vue')
-
+const Bill = () => import(/* webpackChunkName: "billPage" */ '@/pages/bill')
+const Book = () => import(/* webpackChunkName: "bookPage" */ '@/pages/book')
+const Card = () => import(/* webpackChunkName: "cardPage" */ '@/pages/card')
+const Payment = () => import(/* webpackChunkName: "paymentPage" */ '@/pages/payment')
+const SetMeal = () => import(/* webpackChunkName: "setMealPage" */ '@/pages/setMeal')
+const Store = () => import(/* webpackChunkName: "storePage" */ '@/pages/store')
+const Total = () => import(/* webpackChunkName: "totalPage" */ '@/pages/total')
+const User = () => import(/* webpackChunkName: "userPage" */ '@/pages/user')
+const Staff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff')
+const Other = () => import(/* webpackChunkName: "otherPage" */ '@/pages/other')
 const routes = [
-    { path: '/', redirect: '/home' },
-    { path: '/home', component: Home },
-    { 
-        path: '/my',
-        component: My,
-        redirect: '/my/mychild1',
-        children: [
-            {
-                path: 'mychild1',
-                component: MyChild1
-            },
-            {
-                path: 'mychild2',
-                component: MyChild2
-            }
-        ]
-    }
+    { path: '/', redirect: '/bill' },
+    { path: '/bill', component: Bill },
+    { path: '/book', component: Book },
+    { path: '/card', component: Card },
+    { path: '/payment', component: Payment },
+    { path: '/setMeal', component: SetMeal },
+    { path: '/store', component: Store },
+    { path: '/total', component: Total },
+    { path: '/user', component: User },
+    { path: '/other', component: Other },
+    { path: '/staff', component: Staff }
 ]
 
 const router = new VueRouter({

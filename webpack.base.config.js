@@ -23,7 +23,7 @@ module.exports = {
                 }
             },
             {
-                test: /\.scss$/,
+                test: /\.(sc|c)ss$/,
                 use: [
                     process.env.NODE_ENV !== 'production' ? 'vue-style-loader' : {
                         loader: MiniCssExtractPlugin.loader, 
@@ -34,7 +34,7 @@ module.exports = {
                 ]
             },
             {
-                test: /\.(png|gif|jpg|svg)$/,
+                test: /\.(png|gif|jpg|svg|woff|eot|ttf)$/,
                 use: [
                     {
                         loader: 'url-loader',
@@ -51,5 +51,11 @@ module.exports = {
     },
     plugins:[
         new VueLoaderPlugin()
-    ]
+    ],
+    resolve: {
+        extensions: ['.vue', '.js'],
+        alias: {
+            '@': path.resolve(__dirname, 'src')
+        }
+    }
 }
