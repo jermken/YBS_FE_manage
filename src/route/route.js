@@ -8,8 +8,14 @@ const SetMeal = () => import(/* webpackChunkName: "setMealPage" */ '@/pages/setM
 const Store = () => import(/* webpackChunkName: "storePage" */ '@/pages/store')
 const Total = () => import(/* webpackChunkName: "totalPage" */ '@/pages/total')
 const User = () => import(/* webpackChunkName: "userPage" */ '@/pages/user')
+
 const Staff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff')
+const AllStaff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff/allStaff')
+const OfflineStaff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff/offlineStaff')
+const InlineStaff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff/inlineStaff')
+
 const Other = () => import(/* webpackChunkName: "otherPage" */ '@/pages/other')
+
 const routes = [
     { path: '/', redirect: '/bill' },
     { path: '/bill', component: Bill },
@@ -21,7 +27,23 @@ const routes = [
     { path: '/total', component: Total },
     { path: '/user', component: User },
     { path: '/other', component: Other },
-    { path: '/staff', component: Staff }
+    { 
+        path: '/staff',
+        component: Staff,
+        children: [{
+            path: '/staff',
+            redirect: '/staff/inlineStaff'
+        },{
+            path: '/staff/inlineStaff',
+            component: InlineStaff
+        },{
+            path: '/staff/offlineStaff',
+            component: OfflineStaff
+        },{
+            path: '/staff/allStaff',
+            component: AllStaff
+        }]
+    }
 ]
 
 const router = new VueRouter({

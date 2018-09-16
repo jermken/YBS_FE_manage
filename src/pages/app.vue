@@ -24,7 +24,7 @@
             <div class="main">
                 <div class="nav-wrapper">
                     <ul class="nav-list">
-                        <li class="nav-list__item" :class="{active: item.url === currentNav}" v-for="item in navList" :key="item.url">
+                        <li class="nav-list__item" :class="{active: currentNav.indexOf(item.url) > -1}" v-for="item in navList" :key="item.url">
                             <router-link class="nav-list__item__link" :to="item.url">
                                 <img class="nav-list__img" :src="item.imgUrl"/>
                                 <span class="nav-list__title">{{item.title}}</span>
@@ -123,11 +123,11 @@ export default {
 <style lang="scss">
 @import '@/scss/common.scss';
 @import '@/scss/mixin.scss';
-
+@import '@/scss/variable.scss';
 .header {
     height: 80px;
     background: #111;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -166,31 +166,42 @@ export default {
     width: 200px;
     border-radius: 4px;
     overflow: hidden;
+    margin-right: 20px;
 }
 .main-wrapper {
     float: left;
     box-sizing: border-box;
-    width: 1240px;
-    padding: 20px;
+    width: 1220px;
 }
 .nav-list {
     &__item {
         background: #111;
         width: 100%;
-        padding: 10px 0;
         .nav-list__title {
             color: #ccc;
         }
+        &:hover {
+            background: $themeActiveColor;
+            opacity: 0.5;
+        }
         &.active {
-            background: #b62f35;
+            background: $themeActiveColor;
             .nav-list__title {
                 color: #fff;
+            }
+            &:hover {
+                background: $themeActiveColor;
+                opacity: 1;
             }
         }
         &__link {
             display: block;
             width: 100%;
-            height: 100%;
+            padding: 10px 0;
+            &:active {
+                background: $themeActiveColor;
+                opacity: 0.9;
+            }
         }
     }
     &__img {
@@ -211,5 +222,25 @@ export default {
             width: 60px;
             margin-right: 8px;
         }
+}
+.page-tab-wrapper {
+    border-radius: 4px;
+    overflow: hidden;
+    .el-menu-item {
+        height: 48px !important;
+        line-height: 48px !important;
+        &.is-active {
+            border-bottom-color: $themeActiveColor !important;
+            border-bottom-width: 4px !important;
+        }
     }
+}
+.page-form-wrapper {
+    padding-top: 18px;
+}
+.pagination-wrapper {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+}
 </style>
