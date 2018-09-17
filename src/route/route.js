@@ -14,6 +14,7 @@ const AllStaff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff
 const OfflineStaff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff/offlineStaff')
 const InlineStaff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff/inlineStaff')
 
+const Goods = () => import(/* webpackChunkName: "goodsPage" */ '@/pages/goods')
 const Other = () => import(/* webpackChunkName: "otherPage" */ '@/pages/other')
 
 const routes = [
@@ -23,6 +24,7 @@ const routes = [
     { path: '/card', component: Card },
     { path: '/payment', component: Payment },
     { path: '/setMeal', component: SetMeal },
+    { path: '/goods', component: Goods },
     { path: '/store', component: Store },
     { path: '/total', component: Total },
     { path: '/user', component: User },

@@ -82,6 +82,10 @@ export default {
                 imgUrl: require('@/img/bill.png'),
                 url: '/bill'
             },{
+                title: '产品',
+                imgUrl: require('@/img/goods.png'),
+                url: '/goods'
+            },{
                 title: '库存',
                 imgUrl: require('@/img/store.png'),
                 url: '/store'
@@ -237,6 +241,9 @@ export default {
 }
 .page-form-wrapper {
     padding-top: 18px;
+    &.no-tab {
+        padding-top: 0;
+    }
 }
 .pagination-wrapper {
     margin-top: 10px;
