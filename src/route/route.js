@@ -5,7 +5,11 @@ const Book = () => import(/* webpackChunkName: "bookPage" */ '@/pages/book')
 const Card = () => import(/* webpackChunkName: "cardPage" */ '@/pages/card')
 const Payment = () => import(/* webpackChunkName: "paymentPage" */ '@/pages/payment')
 const SetMeal = () => import(/* webpackChunkName: "setMealPage" */ '@/pages/setMeal')
-const Store = () => import(/* webpackChunkName: "storePage" */ '@/pages/store')
+
+const StoreIndex = () => import(/* webpackChunkName: "storePage" */ '@/pages/store')
+const Store = () => import(/* webpackChunkName: "storePage" */ '@/pages/store/store')
+const JoinStore = () => import(/* webpackChunkName: "storePage" */ '@/pages/store/joinStore')
+
 const Total = () => import(/* webpackChunkName: "totalPage" */ '@/pages/total')
 const User = () => import(/* webpackChunkName: "userPage" */ '@/pages/user')
 
@@ -25,7 +29,20 @@ const routes = [
     { path: '/payment', component: Payment },
     { path: '/setMeal', component: SetMeal },
     { path: '/goods', component: Goods },
-    { path: '/store', component: Store },
+    { 
+        path: '/store',
+        component: StoreIndex,
+        children: [{
+            path: '/store',
+            redirect: '/store/index'
+        },{
+            path: '/store/index',
+            component: Store
+        },{
+            path: '/store/joinStore',
+            component: JoinStore
+        }]
+    },
     { path: '/total', component: Total },
     { path: '/user', component: User },
     { path: '/other', component: Other },

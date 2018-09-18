@@ -1,6 +1,6 @@
 <template>
 <el-dialog :visible.sync="dialogShow" title="产品信息" width="500px" :before-close="beforeClose" @close="resetFields('goodsInfoForm')">
-    <el-form :model="goodsInfo" status-icon :rules="formRules" ref="goodsInfoForm">
+    <el-form :model="goodsInfo" status-icon :rules="formRules" ref="goodsInfoForm" :size="globalSize">
         <el-form-item required label="产品名称" label-width="80px" prop="name">
             <el-input placeholder="请输入产品" width="60%" v-model="goodsInfo.name"></el-input>
         </el-form-item>
@@ -25,12 +25,14 @@
         </el-form-item>
     </el-form>
     <span slot="footer">
-        <el-button @click="cancelEvent" size="mini">取消</el-button>
-        <el-button @click="confirmEvent('goodsInfoForm')" size="mini" type="primary">提交</el-button>
+        <el-button @click="cancelEvent" :size="globalSize">取消</el-button>
+        <el-button @click="confirmEvent('goodsInfoForm')" :size="globalSize" type="primary">提交</el-button>
     </span>
 </el-dialog>
 </template>
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
     name: 'GoodsInfo',
     props: {
@@ -82,6 +84,7 @@ export default {
         }
     },
     computed: {
+        ...mapGetters(['globalSize']),
         dialogShow: function() {
             return this.show
         }

@@ -43,6 +43,7 @@
 
 <script>
 import Login from '@/pages/login'
+import { mapGetters, mapActions } from 'vuex'
 
 export default {
     name: 'App',
@@ -107,18 +108,28 @@ export default {
     components: {
         loginPage: Login
     },
+    computed: {
+        ...mapGetters(['userPower', 'globalSize'])
+    },
     watch: {
         $route: function(obj) {
             this.currentNav = obj.path
         }
     },
     methods: {
+        ...mapActions(['setGlobalSize']),
         loginOut() {
             this.$router.push('/login')
         },
         passwordChange() {
             this.$router.push('/login?tab=change')
         }
+    },
+    created() {
+        this.setGlobalSize()
+        window.addEventListener('resize', () => {
+            this.setGlobalSize()
+        })
     },
     mounted() {
     }

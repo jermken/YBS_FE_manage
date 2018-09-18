@@ -1,7 +1,7 @@
 <template>
     <div class="inline-staff">
         <div class="page-form-wrapper">
-            <el-form :inline="true" label-suffix=":" size="mini" :mode="queryInfo">
+            <el-form :inline="true" label-suffix=":" :size="globalSize" :mode="queryInfo">
                 <el-form-item label="姓名">
                     <el-input v-model="queryInfo.name" placeholder="请输入姓名"></el-input>
                 </el-form-item>
@@ -17,7 +17,7 @@
             </el-form>
         </div>
         <div class="page-content-wrapper">
-            <el-table border size="mini" :data="tableData" style="width: 100%;">
+            <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
                 <el-table-column prop="name" label="姓名" width="220"></el-table-column>
                 <el-table-column  prop="sexual" label="性别" width="220">
                     <template slot-scope="scope">
@@ -32,8 +32,8 @@
                 </el-table-column>
                 <el-table-column prop="action" label="操作">
                     <template slot-scope="scope">
-                        <el-button type="text" @click="editorStaff(scope.row)" size="small">编辑</el-button>
-                        <el-button type="text" size="small" @click="deleteStaff(scope.row)">删除</el-button>
+                        <el-button type="text" @click="editorStaff(scope.row)" :size="globalSize">编辑</el-button>
+                        <el-button type="text" :size="globalSize" @click="deleteStaff(scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -55,6 +55,7 @@
 <script>
 import { MessageBox } from 'element-ui'
 import staffInfoDialog from '@/widget/staffInfo'
+import { mapGetters } from 'vuex'
 
 export default {
     name: 'InlineStaff',
@@ -97,6 +98,9 @@ export default {
             },
             staffInfoDialogVisible: false
         }
+    },
+    computed: {
+        ...mapGetters(['globalSize'])
     },
     methods: {
         queryData() {

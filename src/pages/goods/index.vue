@@ -1,7 +1,7 @@
 <template>
     <div class="goods-page">
         <div class="page-form-wrapper no-tab">
-            <el-form :inline="true" label-suffix=":" size="mini" :mode="queryInfo">
+            <el-form :inline="true" label-suffix=":" :size="globalSize" :mode="queryInfo">
                 <el-form-item label="产品名称">
                     <el-input v-model="queryInfo.name" placeholder="请输入产品名称"></el-input>
                 </el-form-item>
@@ -32,7 +32,7 @@
                     <p class="goods-item__title">
                         预警线：<span class="goods-item__txt">{{item.minNum}}</span> 
                     </p>
-                    <el-button class="goods-delete-btn" @click="(e) => deleteGoods(e, item.id)" plain type="primary" size="mini">删除</el-button>
+                    <el-button class="goods-delete-btn" @click="(e) => deleteGoods(e, item.id)" plain type="primary" :size="globalSize">删除</el-button>
                 </li>
             </ul>
         </div>
@@ -53,7 +53,7 @@
 <script>
 import { MessageBox } from 'element-ui'
 import GoodsInfoDialog from '@/widget/goodsInfo'
-
+import { mapGetters } from 'vuex'
 export default {
     name: 'Goods',
     components: {
@@ -132,6 +132,9 @@ export default {
                 minNum: 0
             }]
         }
+    },
+    computed: {
+        ...mapGetters(['globalSize'])
     },
     methods: {
         async fetchData(obj) {
