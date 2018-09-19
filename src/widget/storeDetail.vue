@@ -4,7 +4,7 @@
             <el-table border style="width: 100%;" :size="globalSize" :data="tableData">
                 <el-table-column prop="name" label="产品名称">
                     <template slot-scope="scope">
-                        <el-select v-model="scope.row.name" filterable :disabled="!!detailId">
+                        <el-select v-model="scope.row.name" filterable :disabled="!!detailId" @change="(val) => selectItemGoods(val, scope.$index)">
                             <el-option
                                 v-for="item in goodsList"
                                 :key="item.id"
@@ -20,7 +20,7 @@
                 <el-table-column prop="num" label="当前库存"></el-table-column>
                 <el-table-column prop="action_num" :label="title+'数量'">
                     <template slot-scope="scope">
-                        <el-input :disabled="!!detailId"></el-input>
+                        <el-input :disabled="!!detailId || !scope.row.id" v-model="scope.row.action_num"></el-input>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
@@ -84,7 +84,19 @@ export default {
                 num: '',
                 action_num: ''
             }],
-            goodsList: []
+            goodsList: [{
+                id: '2323',
+                name: '补水面膜',
+                size: '20片/盒',
+                num: 20,
+                code: '123456'
+            },{
+                id: '1212',
+                name: '洗面奶',
+                size: '300ml',
+                num: 15,
+                code: '654321'
+            }]
         }
     },
     computed: {
@@ -109,11 +121,24 @@ export default {
         resetFields(ref) {
             this.$refs[ref].resetFields()
         },
+        selectItemGoods(val,idx) {
+            let obj = this.goodsList.find((obj) => {
+                return obj.id === val
+            })
+            obj.action_num = 0
+            this.tableData[idx] = obj
+        },
         deleteItem(idx) {
             this.tableData.splice(idx, 1)
         },
         addItem(idx) {
-            this.tableData.splice(idx, 0, this.tempItem)
+            this.tableData.splice(idx+1, 0, {
+                name: '',
+                code: '',
+                size: '',
+                num: '',
+                action_num: ''
+            })
         }
     }
 }
