@@ -9,6 +9,7 @@ const SetMeal = () => import(/* webpackChunkName: "setMealPage" */ '@/pages/setM
 const StoreIndex = () => import(/* webpackChunkName: "storePage" */ '@/pages/store')
 const Store = () => import(/* webpackChunkName: "storePage" */ '@/pages/store/store')
 const JoinStore = () => import(/* webpackChunkName: "storePage" */ '@/pages/store/joinStore')
+const OutStore = () => import(/* webpackChunkName: "storePage" */ '@/pages/store/outStore')
 
 const Total = () => import(/* webpackChunkName: "totalPage" */ '@/pages/total')
 const User = () => import(/* webpackChunkName: "userPage" */ '@/pages/user')
@@ -41,6 +42,9 @@ const routes = [
         },{
             path: '/store/joinStore',
             component: JoinStore
+        },{
+            path: '/store/outStore',
+            component: OutStore
         }]
     },
     { path: '/total', component: Total },

@@ -156,7 +156,6 @@ export default {
             })
         },
         closeStaffInfoDialog(isUpdate) {
-
             this.staffInfoDialogVisible = false
             isUpdate && this.fetchData()
         }

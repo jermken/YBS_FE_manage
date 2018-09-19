@@ -39,7 +39,7 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <div class="pagination-wrapper">
+            <div class="pagination-wrapper" v-if="isShowPagination">
                 <el-pagination
                     background
                     layout="prev, pager, next"
@@ -67,11 +67,24 @@ export default {
             },
             page: 1,
             pageSize: 10,
-            tableData: []
+            tableData: [{
+                code: 'e423231',
+                name: '补水面膜',
+                size: '5片/盒',
+                typs: '面膜',
+                price: '188.00',
+                safeNum: 5,
+                num: 13,
+                desc: '这是最新款面膜'
+            }],
+            total: 0
         }
     },
     computed: {
-        ...mapGetters(['globalSize'])
+        ...mapGetters(['globalSize']),
+        isShowPagination() {
+            return this.total > this.pageSize
+        }
     },
     watch: {
         'globalSize': function(val) {

@@ -25,6 +25,9 @@ export default {
             },{
                 title: '入库',
                 url: '/store/joinStore'
+            },{
+                title: '出库',
+                url: '/store/outStore'
             }]
         }
     }
