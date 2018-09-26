@@ -42,6 +42,9 @@ module.exports = merge(baseConf, {
                 sourceMap: true
             }),
             new OptimizeCSSAssetsPlugin({})
-        ]
+        ],
+        splitChunks: {
+            minChunks: 3
+        }
     }
 })
