@@ -57,5 +57,9 @@ module.exports = {
         alias: {
             '@': path.resolve(__dirname, 'src')
         }
+    },
+    externals: {
+        'vue': 'Vue',
+        'element-ui': 'ELEMENT'
     }
 }
