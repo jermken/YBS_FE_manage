@@ -9,7 +9,7 @@ const state = {
 }
 const actions = {
     setGlobalSize ({ commit }) {
-        let globalSize = window.innerWidth > 1440 ? 'small' : 'mini'
+        let globalSize = window.innerWidth > 1540 ? 'small' : 'mini'
         commit('GLOBAL_SIZE', globalSize)
     },
     getUserPower ({ commit }) {

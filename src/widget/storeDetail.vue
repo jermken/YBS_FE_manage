@@ -1,15 +1,16 @@
 <template>
-    <el-dialog :visible.sync="dialogShow" :title="title+'单详情'" width="1000px" :before-close="beforeClose" @close="resetFields('storeDetailForm')">
-        <el-form ref="storeDetailForm" :size="globalSize">
-            <el-table border style="width: 100%;" :size="globalSize" :data="tableData">
+    <el-dialog :visible.sync="dialogShow" :close-on-click-modal="false" :title="title+'单详情'" width="1000px" :before-close="beforeClose" @close="resetFields">
+        <div style="min-height: 400px;">
+            <el-table border style="width: 100%;" :size="globalSize" :data="tableData" height="450">
                 <el-table-column prop="name" label="产品名称">
                     <template slot-scope="scope">
-                        <el-select v-model="scope.row.name" filterable :disabled="!!detailId" @change="(val) => selectItemGoods(val, scope.$index)">
+                        <el-select :size="globalSize" v-model="tableData[scope.$index].id" filterable :disabled="!!detailId" @change="(val) => selectItemGoods(val, scope.$index)">
                             <el-option
                                 v-for="item in goodsList"
                                 :key="item.id"
                                 :label="item.name"
                                 :value="item.id"
+                                :disabled="item.disabled"
                             >
                             </el-option>
                         </el-select>
@@ -20,11 +21,19 @@
                 <el-table-column prop="num" label="当前库存"></el-table-column>
                 <el-table-column prop="action_num" :label="title+'数量'">
                     <template slot-scope="scope">
-                        <el-input :disabled="!!detailId || !scope.row.id" v-model="scope.row.action_num"></el-input>
+                        <el-input :size="globalSize" :disabled="!!detailId || !tableData[scope.$index].id" v-model="tableData[scope.$index].action_num"></el-input>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
+                        <el-button 
+                            :disabled="!!detailId"
+                            icon="el-icon-circle-plus"
+                            circle
+                            :size="globalSize"
+                            @click="addItem(scope.$index)"
+                            >
+                        </el-button>
                         <el-button 
                             :disabled="!!detailId"
                             v-if="tableData.length !== 1 || scope.$index"
@@ -34,18 +43,10 @@
                             @click="deleteItem(scope.$index)"
                             >
                         </el-button>
-                        <el-button 
-                            :disabled="!!detailId"
-                            icon="el-icon-circle-plus"
-                            circle
-                            :size="globalSize"
-                            @click="addItem(scope.$index)"
-                            >
-                        </el-button>
                     </template>
                 </el-table-column>
             </el-table>
-        </el-form>
+        </div>
     </el-dialog>
 </template>
 <script>
@@ -70,13 +71,6 @@ export default {
 
     data() {
         return {
-            tempItem: {
-                name: '',
-                code: '',
-                size: '',
-                num: '',
-                action_num: ''
-            },
             tableData: [{
                 name: '',
                 code: '',
@@ -118,8 +112,19 @@ export default {
         beforeClose() {
             this.$emit('closed')
         },
-        resetFields(ref) {
-            this.$refs[ref].resetFields()
+        resetFields() {
+            this.tableData = [{
+                name: '',
+                code: '',
+                size: '',
+                num: '',
+                action_num: '',
+                id: ''
+            }]
+            this.goodsList = this.goodsList.map((item) => {
+                item.disabled = false
+                return item
+            })
         },
         selectItemGoods(val,idx) {
             let obj = this.goodsList.find((obj) => {
@@ -127,12 +132,24 @@ export default {
             })
             obj.action_num = 0
             this.tableData[idx] = obj
+            this.setGoodsList()
+        },
+        setGoodsList() {
+            this.goodsList = this.goodsList.map((item) => {
+                item.disabled = this.tableData.some((i) => { 
+                    return i.id === item.id
+                }) ? true : false
+                return item
+            })
         },
         deleteItem(idx) {
             this.tableData.splice(idx, 1)
+            this.setGoodsList()
+
         },
         addItem(idx) {
             this.tableData.splice(idx+1, 0, {
+                id: '',
                 name: '',
                 code: '',
                 size: '',

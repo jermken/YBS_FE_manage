@@ -71,7 +71,7 @@ export default {
                 code: 'e423231',
                 name: '补水面膜',
                 size: '5片/盒',
-                typs: '面膜',
+                type: '面膜',
                 price: '188.00',
                 safeNum: 5,
                 num: 13,
