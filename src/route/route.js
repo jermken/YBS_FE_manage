@@ -12,7 +12,11 @@ const JoinStore = () => import(/* webpackChunkName: "storePage" */ '@/pages/stor
 const OutStore = () => import(/* webpackChunkName: "storePage" */ '@/pages/store/outStore')
 
 const Total = () => import(/* webpackChunkName: "totalPage" */ '@/pages/total')
+
 const User = () => import(/* webpackChunkName: "userPage" */ '@/pages/user')
+const CommonUser = () => import(/* webpackChunkName: "userPage" */ '@/pages/user/commonUser')
+const VipUser = () => import(/* webpackChunkName: "userPage" */ '@/pages/user/vipUser')
+const DeleteUser = () => import(/* webpackChunkName: "userPage" */ '@/pages/user/deleteUser')
 
 const Staff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff')
 const AllStaff = () => import(/* webpackChunkName: "staffPage" */ '@/pages/staff/allStaff')
@@ -48,7 +52,23 @@ const routes = [
         }]
     },
     { path: '/total', component: Total },
-    { path: '/user', component: User },
+    { 
+        path: '/user',
+        component: User,
+        children: [{
+            path: '/user',
+            redirect: '/user/commonUser'
+        },{
+            path: '/user/commonUser',
+            component: CommonUser
+        },{
+            path: '/user/vipUser',
+            component: VipUser
+        },{
+            path: '/user/deleteUser',
+            component: DeleteUser
+        }]
+    },
     { path: '/other', component: Other },
     { 
         path: '/staff',

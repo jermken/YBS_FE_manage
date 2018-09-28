@@ -31,11 +31,21 @@
                         <el-tag v-for="item in scope.row.pay_type" :key="item.title" size="mini">{{item.title}}</el-tag>
                     </template>
                 </el-table-column>
+                <el-table-column  prop="status" label="状态" width="100">
+                    <template slot-scope="scope">
+                        <el-tag :type="statusType[scope.row.status]['type']" :size="globalSize">{{statusType[scope.row.status]['title']}}</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column  prop="desc" label="备注">
                     <template slot-scope="scope">
                         <el-popover :content="scope.row.desc" trigger="hover" width="150" placement="top">
                             <div class="bill-desc" slot="reference">{{scope.row.desc}}</div>
                         </el-popover>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="action" label="操作">
+                    <template slot-scope="scope">
+                        <el-button type="primary" :size="globalSize" @click="toAuditor(scope.row.id)">审核</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -51,13 +61,18 @@
                 </el-pagination>
             </div>
         </div>
+        <auditor-dialog :config="auditorDialogConf" @auditor="auditor" @closed="closedAuditorDialog"/>
     </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import AuditorDialog from '@/widget/auditor'
 
 export default {
     name: 'Bill',
+    components: {
+        AuditorDialog
+    },
     data() {
         return {
             queryInfo: {
@@ -65,6 +80,7 @@ export default {
                 date: '2018-09-09'
             },
             tableData: [{
+                id: 1,
                 name: '李四李四',
                 date: '2018-09-08 12:34:50',
                 project: [{title: '洗脸'},{title: '美甲'},{title: '小气泡'},{title: '碧波庭'}],
@@ -72,11 +88,21 @@ export default {
                 card_minu: '500.00',
                 pay_amount: '1500.00',
                 no_pay: '0',
+                status: '1',
                 pay_type: [{title: '现金'}],
                 desc: '扣卡金额50元扣卡金额50元扣卡金额50元'
             }],
             page: 1,
-            pageSize: 10
+            pageSize: 10,
+            statusType: {
+                '1': {type: 'warning', title: '待审核'},
+                '2': {type: 'success', title: '已通过'},
+                '3': {type: 'danger', title: '不通过'}
+            },
+            auditorDialogConf: {
+                visible: false,
+                title: '消费单审核'
+            }
         }
     },
     computed: {
@@ -89,8 +115,34 @@ export default {
         queryData() {
 
         },
+        fetchData() {
+
+        },
         pageChangeEvent() {
 
+        },
+        toAuditor(id) {
+            this.auditorDialogConf.visible = true
+            this.auditorId = id
+            console.log(id, '审核中')
+        },
+        auditor(result) {
+            let obj = {
+                id: this.auditorId,
+                status: '1'
+            }
+            if (result) {
+                obj.status = '2'
+            } else {
+                obj.status = '3'
+            }
+            // TODO: 审核消费单
+            console.log(obj)
+            this.auditorDialogConf.visible = false
+            this.fetchData()
+        },
+        closedAuditorDialog() {
+            this.auditorDialogConf.visible = false
         }
     }
 }
