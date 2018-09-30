@@ -57,16 +57,14 @@ export default {
                 role: '管理员'
             },
             navList: [{
-                title: '预约',
-                imgUrl: require('@/img/book.png'),
-                url: '/book'
-            },
-            {
                 title: '收银',
                 imgUrl: require('@/img/payment.png'),
                 url: '/payment'
-            },
-            {
+            },{
+                title: '预约',
+                imgUrl: require('@/img/book.png'),
+                url: '/book'
+            },{
                 title: '卡类',
                 imgUrl: require('@/img/card.png'),
                 url: '/card'
@@ -79,7 +77,7 @@ export default {
                 imgUrl: require('@/img/user.png'),
                 url: '/user'
             },{
-                title: '流水',
+                title: '订单',
                 imgUrl: require('@/img/bill.png'),
                 url: '/bill'
             },{
@@ -98,6 +96,10 @@ export default {
                 title: '店员',
                 imgUrl: require('@/img/staff.png'),
                 url: '/staff'
+            },{
+                title: '定金',
+                imgUrl: require('@/img/staff.png'),
+                url: '/subscription'
             },{
                 title: '其他',
                 imgUrl: require('@/img/other.png'),
