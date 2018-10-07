@@ -5,7 +5,7 @@
                 <span class="payment-title">客户信息</span>
                 <el-form :model="userInfo" status-icon :rules="formRules" ref="userInfoForm" :size="globalSize" label-width="80px">
                     <el-form-item label="客户类别">
-                        <el-radio-group v-model="userInfo.userType">
+                        <el-radio-group v-model="userInfo.userType" @change="onUserTypeChange">
                             <el-radio label="1">游客</el-radio>
                             <el-radio label="2">客户</el-radio>
                         </el-radio-group>
@@ -13,14 +13,14 @@
                     <el-form-item label="游客姓名" v-if="userInfo.userType == 1">
                         <el-input v-model="userInfo.name" placeholder="请输入游客姓名" style="width:60% !important;"></el-input>
                     </el-form-item>
-                    <el-form-item label="美容师" v-if="userInfo.userType == 1">
-                        <el-select v-model="userInfo.server" :size="globalSize" filterable placeholder="请选择美容师">
-                            <el-option v-for="item in testServer" :key="item.id" :label="item.name" :value="item.name"></el-option>
-                        </el-select>
-                    </el-form-item>
                     <el-form-item label="客户姓名" v-else>
                         <el-input v-model="userInfo.name" placeholder="请输入客户姓名" style="width:60% !important;"></el-input>
                         <span v-if="userInfo.info.isVip" class="vip-tips">（会员）</span>
+                    </el-form-item>
+                    <el-form-item label="美容师">
+                        <el-select v-model="userInfo.server" :size="globalSize" filterable placeholder="请选择美容师">
+                            <el-option v-for="item in testServer" :key="item.id" :label="item.name" :value="item.name"></el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="备注">
                         <el-input type="textarea" v-model="userInfo.desc" :rows="2" :autosize="false"></el-input>
@@ -36,7 +36,7 @@
 
             <div class="payment-page-top__right">
                 <span class="payment-title">未支付订单</span>
-                <el-table border :size="globalSize" :data="localOrderList" style="width: 100%;margin-top: 10px;">
+                <el-table border :size="globalSize" :data="localOrderList" style="width: 100%;margin-top: 10px;" height="300px">
                     <el-table-column label="客户姓名" width="100">
                         <template slot-scope="scope">
                             <span>{{scope.row.userInfo.name}}</span>
@@ -73,7 +73,7 @@
             <span class="add-project-wrapper">
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addGoods">商品出售</el-button>
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addProject">项目服务</el-button>
-                <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetMeal">套餐项目</el-button>
+                <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetMeal" :disabled="userInfo.userType == 1">套餐项目</el-button>
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetProject">自定义项目</el-button>
             </span>
             <el-table  border :size="globalSize" :data="consumeData" style="width: 100%;margin-top: 10px;" max-height="330">
@@ -196,6 +196,11 @@ export default {
         ...mapGetters(['globalSize'])
     },
     methods: {
+        onUserTypeChange() {
+            if (this.consumeData.length) {
+                this.consumeData = []
+            }
+        },
         addGoods() {
             this.consumeData.push({
                 type: 'goods',

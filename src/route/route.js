@@ -27,7 +27,7 @@ const Goods = () => import(/* webpackChunkName: "goodsPage" */ '@/pages/goods')
 const Other = () => import(/* webpackChunkName: "otherPage" */ '@/pages/other')
 
 const routes = [
-    { path: '/', redirect: '/bill' },
+    { path: '/', redirect: '/payment' },
     { path: '/bill', component: Bill },
     { path: '/book', component: Book },
     { path: '/card', component: Card },
