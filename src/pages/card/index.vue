@@ -1,7 +1,7 @@
 <template>
     <div class="card-page">
         <div class="page-form-wrapper no-tab">
-            <el-form :inline="true" label-suffix=":" :size="globalSize" :mode="queryInfo">
+            <el-form :inline="true" label-suffix="：" :size="globalSize" :mode="queryInfo">
                 <el-form-item label="卡类名称">
                     <el-input v-model="queryInfo.name" placeholder="请输入卡类名称"></el-input>
                 </el-form-item>
@@ -18,8 +18,11 @@
                 <li class="card-item" v-for="(item, index) in cardList" :key="index" @click="showCardInfoDialog(item.id)">
                     <img class="card-item__pic" :src="item.imgUrl"/>
                     <div class="card-item__title">{{item.name}}</div>
-                    <div class="card-item__desc">充值满&nbsp;&nbsp;&nbsp;<span class="card-item__price">{{item.total}}</span>&nbsp;&nbsp;&nbsp;即送</div>
-                    <el-button @click="(e) => showCardUser(e, item.id)">顾客列表&nbsp;> </el-button>
+                    <div class="card-item__desc">充值满&nbsp;&nbsp;&nbsp;
+                        <span class="card-item__price">{{item.total}}</span>
+                        &nbsp;&nbsp;&nbsp;即送
+                        <el-button :size="globalSize" class="card-user-btn" type="text" @click="(e) => showCardUser(e, item.id)">持卡客户&nbsp;> </el-button>
+                    </div>
                     <el-button class="card-delete-btn" @click="(e) => deleteCard(e, item.id)" plain type="primary" :size="globalSize">删除</el-button>
                 </li>
             </ul>
@@ -36,17 +39,20 @@
             </el-pagination>
         </div>
         <card-info-dialog :show.sync="cardInfoDialogVisible" :cardId="cardId" @closed="closeCardInfoDialog"/>
+        <card-user-dialog :show.sync="cardUserDialogVisible" :cardId="cardId" @closed="closeCardUserDialog"/>
     </div>
 </template>
 <script>
 import { MessageBox } from 'element-ui'
 import { mapGetters } from 'vuex'
 import cardInfoDialog from '@/widget/cardInfo'
+import cardUserDialog from '@/widget/cardUserList'
 
 export default {
     name: 'Card',
     components: {
-        cardInfoDialog
+        cardInfoDialog,
+        cardUserDialog
     },
     data() {
         return {
@@ -186,8 +192,8 @@ export default {
             position: absolute;
             width: 100%;
             bottom: 0;
-            text-align: center;
             font-size: 18px;
+            padding-left: 20px;
         }
         &__price {
             color: #e4393c;
@@ -200,6 +206,9 @@ export default {
             bottom: 10px;
             right: 10px;
             display: none;
+        }
+        .card-user-btn {
+            margin-left: 20px;
         }
     }
 }

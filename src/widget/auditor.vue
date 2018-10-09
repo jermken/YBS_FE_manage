@@ -1,5 +1,5 @@
 <template>
-<el-dialog :visible.sync="dialogShow" :title="config.title" width="500px" :before-close="beforeClose">
+<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" :title="config.title" width="500px" :before-close="beforeClose">
     <span slot="footer">
         <el-button @click="cancelEvent" :size="globalSize">取消</el-button>
         <el-button @click="disAgree" :size="globalSize" type="primary">不通过</el-button>
@@ -11,6 +11,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
+    // 审核组件
     name: 'AuditorDialog',
     props: {
         config: {

@@ -53,6 +53,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
+    // 入库或出库单详情组件
     name: 'StoreDetailDialog',
     props: {
         show: {

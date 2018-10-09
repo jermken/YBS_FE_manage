@@ -1,5 +1,5 @@
 <template>
-<el-dialog :visible.sync="dialogShow" title="客户信息" width="600px" :before-close="beforeClose" @close="resetFields('userInfoForm')">
+<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="客户信息" width="600px" :before-close="beforeClose" @close="resetFields('userInfoForm')">
     <el-form :model="userInfo" status-icon :rules="formRules" ref="userInfoForm" :size="globalSize">
         <el-form-item required label="姓名" label-width="80px" prop="name">
             <el-input placeholder="请输入姓名" width="60%" v-model="userInfo.name"></el-input>
@@ -45,6 +45,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
+    // 用户信息弹窗组件
     name: 'UserInfo',
     props: {
         config: {

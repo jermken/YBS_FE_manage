@@ -54,7 +54,7 @@
                     </el-table-column>
                     <el-table-column label="订单总金额" width="120">
                         <template slot-scope="scope">
-                            <span>{{scope.row.userInfo.server}}</span>
+                            <span>{{scope.row.total}}</span>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作">
@@ -75,6 +75,8 @@
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addProject">项目服务</el-button>
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetMeal" :disabled="userInfo.userType == 1">套餐项目</el-button>
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetProject">自定义项目</el-button>
+                <el-button :size="globalSize" type="primary" round @click="buyCard" :disabled="!(userInfo.userType == 2 && userInfo.name && userInfo.server)">开卡服务</el-button>
+                <el-button :size="globalSize" type="primary" round @click="recharge" :disabled="!(userInfo.userType == 2 && userInfo.name && userInfo.server)">充值服务</el-button>
             </span>
             <el-table  border :size="globalSize" :data="consumeData" style="width: 100%;margin-top: 10px;" max-height="330">
                 <el-table-column prop="type" label="项目类别" width="200">
@@ -144,16 +146,22 @@
             </div>
         </div>
         <order-detail-dialog :config="orderDetailConf" @closed="closeOrderDetailDialog"/>
+        <buy-card-dialog :show.sync="buyCardConfVisible" :user_id="userInfo.info.id" :server_id="userInfo.server" @closed="closeBuyCardDialog" @topayment="showPaymentDialog"/>
+        <payment-dialog :show.sync="paymentVisible" :info="paymentInfo" @closed="closePaymentDialog" :type="paymentType"/>
     </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
 import OrderDetailDialog from '@/widget/orderDetail'
+import buyCardDialog from '@/widget/buyCard'
+import paymentDialog from '@/widget/payment'
 
 export default {
     name: 'Payment',
     components: {
-        OrderDetailDialog
+        OrderDetailDialog,
+        buyCardDialog,
+        paymentDialog
     },
     data() {
         return {
@@ -162,7 +170,8 @@ export default {
                 desc: '',
                 server: '',
                 info: {
-                    isVip: true
+                    isVip: true,
+                    id: 0
                 }
             },
             formRules: {
@@ -189,7 +198,11 @@ export default {
                     orderList: []
                 },
                 title: null
-            }
+            },
+            buyCardConfVisible: false,
+            paymentVisible: false,
+            paymentInfo: {},
+            paymentType: ''
         }
     },
     computed: {
@@ -233,6 +246,15 @@ export default {
                 server: ''
             })
         },
+        // 开卡
+        buyCard() {
+            this.buyCardConfVisible = true
+            this.paymentType = 'card'
+        },
+        // 充值
+        recharge() {
+            this.paymentType = 'recharge'
+        },
         deleteItem(idx) {
             this.consumeData.splice(idx, 1)
         },
@@ -250,10 +272,15 @@ export default {
             this.consumeData = JSON.parse(JSON.stringify(this.consumeData))
         },
         saveOrder() {
+            let total = 0
+            for(let i = 0; i < this.consumeData.length; i++) {
+                total += this.consumeData[i].price * this.consumeData[i].num
+            }
             let localOrder = {
                 userInfo: this.userInfo,
                 orderList: this.consumeData,
-                date: +new Date()
+                date: +new Date(),
+                total: total
             }
             let local_order = (localStorage.getItem('local_order') && JSON.parse(localStorage.getItem('local_order'))) || []
             local_order.push(localOrder)
@@ -270,8 +297,16 @@ export default {
         payment(order) {
             // TODO: 付款操作
             if (order) {
-                console.log(order)
+                this.paymentInfo = order
+            } else {
+                let total = 0
+                for(let i = 0; i < this.consumeData.length; i++) {
+                    total += this.consumeData[i].price * this.consumeData[i].num
+                }
+                this.paymentInfo = {userInfo: this.userInfo, orderList: this.consumeData, date: +new Date(), total: total}
             }
+            this.paymentType = 'project'
+            this.showPaymentDialog()
         },
         updateLocalOrder() {
             let data = (localStorage.getItem('local_order') && JSON.parse(localStorage.getItem('local_order'))) || []
@@ -292,6 +327,17 @@ export default {
         closeOrderDetailDialog(update) {
             this.orderDetailConf.visible = false
             update && this.updateLocalOrder()
+        },
+        closeBuyCardDialog(update) {
+            this.buyCardConfVisible = false
+            update && this.updateLocalOrder()
+        },
+        showPaymentDialog() {
+            this.paymentVisible = true
+        },
+        closePaymentDialog(update) {
+            this.paymentVisible = false
+            update && console.log(1111)
         }
     },
     mounted() {

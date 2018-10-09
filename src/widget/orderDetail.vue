@@ -114,6 +114,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
+    // 订单详情组件
     name: 'OrderDetailDialog',
     props: {
         config: {

@@ -1,5 +1,5 @@
 <template>
-<el-dialog :visible.sync="dialogShow" title="产品信息" width="500px" :before-close="beforeClose" @close="resetFields('goodsInfoForm')">
+<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="产品信息" width="500px" :before-close="beforeClose" @close="resetFields('goodsInfoForm')">
     <el-form :model="goodsInfo" status-icon :rules="formRules" ref="goodsInfoForm" :size="globalSize">
         <el-form-item required label="产品名称" label-width="80px" prop="name">
             <el-input placeholder="请输入产品" width="60%" v-model="goodsInfo.name"></el-input>
@@ -34,6 +34,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
+    // 商品详情组件
     name: 'GoodsInfo',
     props: {
         goodsId: null,

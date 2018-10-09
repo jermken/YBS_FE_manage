@@ -1,8 +1,8 @@
 <template>
-<el-dialog :visible.sync="dialogShow" title="卡类信息" width="500px" :before-close="beforeClose" @close="resetFields('cardInfoForm')">
+<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="卡类信息" width="500px" :before-close="beforeClose" @close="resetFields('cardInfoForm')">
     <el-form :model="cardInfo" status-icon :rules="formRules" ref="cardInfoForm" :size="globalSize">
         <el-form-item required label="卡类名称" label-width="80px" prop="name">
-            <el-input placeholder="请输入产品" width="60%" v-model="cardInfo.name"></el-input>
+            <el-input placeholder="请输入卡类名称" width="60%" v-model="cardInfo.name"></el-input>
         </el-form-item>
         <el-form-item required label="卡类价格" label-width="80px" prop="price">
             <el-input placeholder="请输入价格" width="60%" v-model="cardInfo.price"></el-input>
@@ -21,6 +21,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
+    // 卡片详情组件
     name: 'CardInfo',
     props: {
         cardId: null,
@@ -46,21 +47,6 @@ export default {
                     required: true,
                     message: '请填写价格',
                     trigger: 'blur'
-                }],
-                size: [{
-                    required: true,
-                    message: '请输入规格',
-                    trigger: 'blur'
-                }],
-                minNum: [{
-                    required: true,
-                    message: '请输入库存警线',
-                    trigger: 'blur'
-                }],
-                status: [{
-                    required: true,
-                    message: '请选择在售状态',
-                    trigger: 'change'
                 }]
             }
         }

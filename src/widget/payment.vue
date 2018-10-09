@@ -1,96 +1,99 @@
 <template>
-    <el-dialog :visible.sync="dialogShow" :close-on-click-modal="false" :title="title+'单详情'" width="1000px" :before-close="beforeClose" @close="resetFields">
-        <div style="min-height: 400px;">
-            <el-table border style="width: 100%;" :size="globalSize" :data="tableData" height="450">
-                <el-table-column prop="name" label="产品名称">
-                    <template slot-scope="scope">
-                        <el-select :size="globalSize" v-model="tableData[scope.$index].id" filterable :disabled="!!detailId" @change="(val) => selectItemGoods(val, scope.$index)">
-                            <el-option
-                                v-for="item in goodsList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id"
-                                :disabled="item.disabled"
-                            >
-                            </el-option>
-                        </el-select>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="code" label="编码"></el-table-column>
-                <el-table-column prop="size" label="规格"></el-table-column>
-                <el-table-column prop="num" label="当前库存"></el-table-column>
-                <el-table-column prop="action_num" :label="title+'数量'">
-                    <template slot-scope="scope">
-                        <el-input :size="globalSize" :disabled="!!detailId || !tableData[scope.$index].id" v-model="tableData[scope.$index].action_num"></el-input>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作">
-                    <template slot-scope="scope">
-                        <el-button 
-                            :disabled="!!detailId"
-                            icon="el-icon-circle-plus"
-                            circle
-                            :size="globalSize"
-                            @click="addItem(scope.$index)"
-                            >
-                        </el-button>
-                        <el-button 
-                            :disabled="!!detailId"
-                            v-if="tableData.length !== 1 || scope.$index"
-                            icon="el-icon-remove"
-                            circle
-                            :size="globalSize"
-                            @click="deleteItem(scope.$index)"
-                            >
-                        </el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </div>
-    </el-dialog>
+<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="请确认账单信息是否有误" width="500px" :before-close="beforeClose" @close="resetFields('paymentForm')">
+    <el-form :model="paymentInfo" status-icon :rules="formRules" ref="paymentForm" :size="globalSize">
+        <el-form-item label="顾客" label-width="100px" prop="name">
+            <el-input v-model="paymentInfo.userInfo.name" disabled style="width: 50%!important;"></el-input>
+        </el-form-item>
+        <el-form-item label="账单类别" label-width="100px" prop="paymentType">
+            <el-tag type="success">{{paymentType[type]}}</el-tag>
+        </el-form-item>
+        <el-form-item label="账单总金额" label-width="100px" prop="total">
+            <el-input v-model="paymentInfo.total" disabled style="width: 50%!important;"></el-input>
+        </el-form-item>
+        <el-form-item v-if="type === 'project'" label="扣卡金额" label-width="100px" prop="card_minu">
+            <el-input v-model="paymentInfo.card_minu" style="width: 50%!important;"></el-input>
+        </el-form-item>
+        <el-form-item required label="实收金额" label-width="100px" prop="pay_amount">
+            <el-input v-model="paymentInfo.pay_amount" placeholder="请输入需支付金额" style="width: 50%!important;"></el-input>
+        </el-form-item>
+        <el-form-item v-if="type === 'recharge' || type === 'card'" required label="赠送金额" label-width="100px" prop="present_amount">
+            <el-input v-model="paymentInfo.present_amount" placeholder="请输入需支付金额" style="width: 50%!important;"></el-input>
+        </el-form-item>
+        <el-form-item label="未付金额" label-width="100px" prop="no_pay">
+            <el-input v-model="paymentInfo.no_pay" placeholder="请输入需支付金额" style="width: 50%!important;"></el-input>
+        </el-form-item>
+        <el-form-item required label="付款方式" label-width="100px" prop="pay_type">
+            <el-select v-model="paymentInfo.pay_type" filterable placeholder="请选择支付方式" multiple>
+                <el-option v-for="item in payType" :key="item.value" :label="item.label" :value="item.value"></el-option>
+            </el-select>
+        </el-form-item>
+    </el-form>
+    <span slot="footer">
+        <el-button @click="cancelEvent" :size="globalSize">取消</el-button>
+        <el-button @click="confirmEvent('paymentForm')" :size="globalSize" type="primary">提交</el-button>
+    </span>
+</el-dialog>
 </template>
 <script>
 import { mapGetters } from 'vuex'
 
 export default {
-    name: 'StoreDetailDialog',
+    // 结账弹窗组件
+    name: 'Payment',
     props: {
-        show: {
-            type: Boolean,
-            required: true
-        },
-        detailId: {
-            type: String,
-            required: false
-        },
-        title: {
-            type: String,
-            required: true
-        }
+        show: false,
+        type: '',
+        info: {}
     },
-
     data() {
         return {
-            tableData: [{
-                name: '',
-                code: '',
-                size: '',
-                num: '',
-                action_num: ''
-            }],
-            goodsList: [{
-                id: '2323',
-                name: '补水面膜',
-                size: '20片/盒',
-                num: 20,
-                code: '123456'
+            paymentInfo: {
+                orderList: [],
+                userInfo: {},
+                pay_type: [],
+                card_minu: '',
+                pay_amount: '',
+                no_pay: '',
+                total: ''
+            },
+            paymentType: {
+                project: '商品或服务',
+                card: '开卡',
+                recharge: '充值'
+            },
+            formRules:{
+                pay_amount: [{
+                    required: true,
+                    message: '收款金额必填（数字）',
+                    trigger: 'blur'
+                }],
+                pay_type: [{
+                    required: true,
+                    message: '付款方式必选',
+                    trigger: 'change'
+                }]
+            },
+            payType: [{
+                label: '微信',
+                value: 'wechat'
             },{
-                id: '1212',
-                name: '洗面奶',
-                size: '300ml',
-                num: 15,
-                code: '654321'
+                label: '支付宝',
+                value: 'alipay'
+            },{
+                label: '现金',
+                value: 'cash'
+            },{
+                label: '银行卡',
+                value: 'bankCard'
+            },{
+                label: '扣卡',
+                value: 'cardMinu'
             }]
+        }
+    },
+    watch: {
+        'info': function(obj) {
+            this.paymentInfo = Object.assign({}, this.paymentInfo, obj)
         }
     },
     computed: {
@@ -99,64 +102,30 @@ export default {
             return this.show
         }
     },
-    watch: {
-        'detailId': function(id) {
-            id && this.fetchDetailInfo(id)
-        }
-    },
     methods: {
-        async fetchDetailInfo(id) {
-            console.log(id)
-            // TODO: 拉取出/入库单详情
+        cancelEvent() {
+            this.$emit('closed')
+        },
+        confirmEvent(ref) {
+            this.$refs[ref].validate((valid) => {
+                if (valid) {
+                    // TODO: 新增或修改卡类信息
+                    alert('success')
+                    this.$emit('closed', true)
+                } else {
+                    return false
+                }
+            })
         },
         beforeClose() {
             this.$emit('closed')
         },
-        resetFields() {
-            this.tableData = [{
-                name: '',
-                code: '',
-                size: '',
-                num: '',
-                action_num: '',
-                id: ''
-            }]
-            this.goodsList = this.goodsList.map((item) => {
-                item.disabled = false
-                return item
-            })
-        },
-        selectItemGoods(val,idx) {
-            let obj = this.goodsList.find((obj) => {
-                return obj.id === val
-            })
-            obj.action_num = 0
-            this.tableData[idx] = obj
-            this.setGoodsList()
-        },
-        setGoodsList() {
-            this.goodsList = this.goodsList.map((item) => {
-                item.disabled = this.tableData.some((i) => { 
-                    return i.id === item.id
-                }) ? true : false
-                return item
-            })
-        },
-        deleteItem(idx) {
-            this.tableData.splice(idx, 1)
-            this.setGoodsList()
-
-        },
-        addItem(idx) {
-            this.tableData.splice(idx+1, 0, {
-                id: '',
-                name: '',
-                code: '',
-                size: '',
-                num: '',
-                action_num: ''
-            })
+        resetFields(ref) {
+            this.$refs[ref].resetFields()
         }
+    },
+    mounted() {
+        // TODO: 拉取卡类列表
     }
 }
 </script>

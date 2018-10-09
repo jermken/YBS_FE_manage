@@ -1,5 +1,5 @@
 <template>
-<el-dialog :visible.sync="dialogShow" title="员工信息" width="500px" :before-close="beforeClose" @close="resetFields('staffInfoForm')">
+<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="员工信息" width="500px" :before-close="beforeClose" @close="resetFields('staffInfoForm')">
     <el-form :model="staffInfo" status-icon :rules="formRules" ref="staffInfoForm" :size="globalSize">
         <el-form-item required label="姓名" label-width="80px" prop="name">
             <el-input placeholder="请输入姓名" width="60%" v-model="staffInfo.name"></el-input>
@@ -35,6 +35,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
+    // 员工信息详情组件
     name: 'StaffInfo',
     props: {
         staffId: null,
