@@ -44,6 +44,7 @@
 <script>
 import Login from '@/pages/login'
 import { mapGetters, mapActions } from 'vuex'
+import axios from 'axios'
 
 export default {
     name: 'App',
@@ -125,6 +126,23 @@ export default {
         },
         passwordChange() {
             this.$router.push('/login?tab=change')
+        },
+        initAxiosConfig() {
+            axios.defaults.timeout = 2000
+            // 添加请求拦截器
+            axios.interceptors.request.use((config) => {
+                console.log(config)
+                return config
+            })
+            // 添加响应拦截器
+            axios.interceptors.response.use((res) => {
+                console.log(res)
+                // 未登录控制器
+                if (res.data && res.data.code === 401) {
+                    this.$router.push('/login')
+                    // return Promise.reject('未登录')
+                }
+            })
         }
     },
     created() {
@@ -132,6 +150,7 @@ export default {
         window.addEventListener('resize', () => {
             this.setGlobalSize()
         })
+        this.initAxiosConfig()
     },
     mounted() {
     }

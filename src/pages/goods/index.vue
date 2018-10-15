@@ -54,11 +54,14 @@
 import { MessageBox } from 'element-ui'
 import GoodsInfoDialog from '@/widget/goodsInfo'
 import { mapGetters } from 'vuex'
+import loader from '@/mixins/loader'
+
 export default {
     name: 'Goods',
     components: {
         GoodsInfoDialog
     },
+    mixins: [loader],
     data() {
         return {
             queryInfo: {
@@ -181,6 +184,14 @@ export default {
     },
     mounted() {
         this.fetchData()
+        console.log(this)
+        this.get('getGoodsList').then((res) => {
+            console.log(res)
+            this.goodsList = res.data
+            this.total = res.total
+        }).catch((err) => {
+            console.log(err)
+        })
     }
 }
 </script>
