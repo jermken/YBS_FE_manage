@@ -1,5 +1,5 @@
 <template>
-<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="卡类信息" width="500px" :before-close="beforeClose" @close="resetFields('setMealInfoForm')">
+<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="套餐信息" width="500px" :before-close="beforeClose" @close="resetFields('setMealInfoForm')">
     <el-form :model="setmealInfo" status-icon :rules="formRules" ref="setMealInfoForm" :size="globalSize">
         <el-form-item required label="套餐名称" label-width="80px" prop="name">
             <el-input placeholder="请输入套餐名称" v-model="setmealInfo.name"></el-input>
@@ -100,7 +100,7 @@ export default {
                 name: '国庆活动套卡',
                 total: 200,
                 date: '2018-09-01,2018-12-30',
-                sub_project: '美甲，洗脸,化妆',
+                sub_project: '美甲,洗脸,化妆',
                 sub_times: '1,1,1'
             }
             SETMEAL_LIST.date = SETMEAL_LIST.date.split(',')

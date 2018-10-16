@@ -16,7 +16,9 @@
         <div class="page-content-wrapper">
             <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
                 <el-table-column prop="name" label="套卡名称" width="220"></el-table-column>
-                <el-table-column prop="start_time" label="开始时间" width="220"></el-table-column>
+                <el-table-column prop="start_time" label="开始时间" width="220">
+                    <template></template>
+                </el-table-column>
                 <el-table-column prop="end_time" label="结束时间" width="220"></el-table-column>
                 <el-table-column prop="total" label="套卡价格" width="220"></el-table-column>
                 <el-table-column prop="action" label="操作">
