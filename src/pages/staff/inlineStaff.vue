@@ -56,9 +56,11 @@
 import { MessageBox } from 'element-ui'
 import staffInfoDialog from '@/widget/staffInfo'
 import { mapGetters } from 'vuex'
+import loader from '@/mixins/loader'
 
 export default {
     name: 'InlineStaff',
+    mixins: [loader],
     components: {
         staffInfoDialog
     },
@@ -70,30 +72,12 @@ export default {
                 manager: '店长',
                 boss: '老板'
             },
-            tableData: [{
-                name: 'jermken1',
-                sexual: '1',
-                birthday: '1993-09-08',
-                role: 'staff',
-                id: '111'
-            },{
-                name: 'jermken2',
-                sexual: '2',
-                birthday: '1993-09-03',
-                role: 'manager',
-                id: '222'
-            },{
-                name: 'jermken3',
-                sexual: '2',
-                birthday: '1993-02-03',
-                role: 'boss',
-                id: '333'
-            }],
+            tableData: [],
             pageSize: 2,
             page: 1,
             queryInfo: {
                 name: '',
-                staffCode: '',
+                id: '',
                 status: 1
             },
             staffInfoDialogVisible: false
@@ -118,7 +102,7 @@ export default {
                 page,
                 pageSize: this.pageSize,
                 name: '',
-                staffCode: '',
+                id: '',
                 status: 1
             }
             this.fetchData(params)
@@ -129,8 +113,20 @@ export default {
                 page: 1,
                 pageSize: this.pageSize
             }
-            console.log(params)
-            // TODO: 拉取在职员工列表
+            console.log(params, 'fetch stafflist params')
+            this.get('getStaffList',{
+                ...this.queryInfo
+            }).then((res) => {
+                console.log(res, 'stafflist info')
+                if(!res.code) {
+                    this.tableData = res.data
+                } else {
+                    this.$msgbox({
+                        message: res.msg,
+                        type: 'error'
+                    })
+                }
+            })
         },
         addStaff() {
             this.staffInfoDialogVisible = true
@@ -140,23 +136,35 @@ export default {
             this.staffInfoDialogVisible = true
             this.staffId = row.id
         },
-        deleteStaff() {
-            // TODO: 删除员工
+        deleteStaff(row) {
             MessageBox.confirm('确认删除此员工', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning',
                 center: true
             }).then(() => {
-                MessageBox({
-                    type: 'success',
-                    message: '删除成功'
+                this.post('deleteStaff', {
+                    id: row.id
+                }).then((res) => {
+                    if(!res.code) {
+                        this.$message({
+                            message: res.msg,
+                            type: 'success'
+                        })
+                        this.fetchData()
+                    } else {
+                        this.$msgbox({
+                            message: res.msg,
+                            type: 'error'
+                        })
+                    }
                 })
             }).catch(() => {
             })
         },
         closeStaffInfoDialog(isUpdate) {
             this.staffInfoDialogVisible = false
+            this.staffId = null
             isUpdate && this.fetchData()
         }
     },

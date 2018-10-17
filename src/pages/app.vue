@@ -45,9 +45,11 @@
 import Login from '@/pages/login'
 import { mapGetters, mapActions } from 'vuex'
 import axios from 'axios'
+import loader from '@/mixins/loader'
 
 export default {
     name: 'App',
+    mixins: [loader],
     data() {
         let currentNav = this.$route.path
         return {
@@ -122,7 +124,22 @@ export default {
     methods: {
         ...mapActions(['setGlobalSize']),
         loginOut() {
-            this.$router.push('/login')
+            this.post('loginOut', {
+                name: localStorage.getItem('sys_username') || 'jermken'
+            }).then(res => {
+                if(!res.code) {
+                    this.$message({
+                        message: res.msg,
+                        type: 'success'
+                    })
+                    this.$router.push('/login')
+                } else {
+                    this.$msgbox({
+                        type: 'error',
+                        message: res.msg
+                    })
+                }
+            })
         },
         passwordChange() {
             this.$router.push('/login?tab=change')
@@ -136,12 +153,12 @@ export default {
             })
             // 添加响应拦截器
             axios.interceptors.response.use((res) => {
-                console.log(res)
                 // 未登录控制器
                 if (res.data && res.data.code === 401) {
-                    this.$router.push('/login')
+                    return this.$router.push('/login')
                     // return Promise.reject('未登录')
                 }
+                return res
             })
         }
     },

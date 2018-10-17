@@ -2,7 +2,10 @@
 <el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="员工信息" width="500px" :before-close="beforeClose" @close="resetFields('staffInfoForm')">
     <el-form :model="staffInfo" status-icon :rules="formRules" ref="staffInfoForm" :size="globalSize">
         <el-form-item required label="姓名" label-width="80px" prop="name">
-            <el-input placeholder="请输入姓名" width="60%" v-model="staffInfo.name"></el-input>
+            <el-input :disabled="staffId" placeholder="请输入姓名" width="60%" v-model="staffInfo.name"></el-input>
+        </el-form-item>
+        <el-form-item required label="联系方式" label-width="80px" prop="tell">
+            <el-input placeholder="请输入手机号" width="60%" v-model="staffInfo.tell"></el-input>
         </el-form-item>
         <el-form-item required label="性别" label-width="80px" prop="sexual">
             <el-radio-group v-model="staffInfo.sexual">
@@ -33,10 +36,13 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import loader from '@/mixins/loader'
+import moment from 'moment'
 
 export default {
     // 员工信息详情组件
     name: 'StaffInfo',
+    mixins: [loader],
     props: {
         staffId: null,
         show: false
@@ -58,12 +64,18 @@ export default {
                 sexual: '',
                 birthday: '',
                 role: '',
-                status: ''
+                status: '',
+                tell: ''
             },
             formRules:{
                 name: [{
                     required: true,
                     message: '姓名不能为空',
+                    trigger: 'blur'
+                }],
+                tell: [{
+                    required: true,
+                    message: '手机必填',
                     trigger: 'blur'
                 }],
                 sexual: [{
@@ -102,8 +114,20 @@ export default {
     },
     methods: {
         async fetchStaffInfo(id) {
-            console.log(id)
-            // TODO: 拉取员工信息
+            console.log(id, 'staff detail id')
+            this.get('getStaffList', {
+                id
+            }).then((res) => {
+                if(!res.code) {
+                    console.log(res, 'staff detail info')
+                    this.staffInfo = res.data[0]
+                } else {
+                    this.$msgbox({
+                        message: res.msg,
+                        type: 'error'
+                    })
+                }
+            })
         },
         cancelEvent() {
             this.$emit('closed')
@@ -111,9 +135,46 @@ export default {
         confirmEvent(ref) {
             this.$refs[ref].validate((valid) => {
                 if (valid) {
-                    // TODO: 新增或修改员工信息
-                    alert('success')
-                    this.$emit('closed', true)
+                    let now = moment().format('YYYY-MM-DD HH:mm:ss')
+                    if (this.staffId) {
+                        this.post('updateStaff',{
+                            id: this.staffId,
+                            ...this.staffInfo,
+                            update_time: now
+                        }).then((res) => {
+                            if(!res.code) {
+                                this.$emit('closed', true)
+                                this.$message({
+                                    message: res.msg,
+                                    type: 'success'
+                                })
+                            } else {
+                                this.$msgbox({
+                                    message: res.msg,
+                                    type: 'error'
+                                })
+                            }
+                        })
+                    } else {
+                        this.post('addStaff',{
+                            ...this.staffInfo,
+                            create_time: now,
+                            update_time: now
+                        }).then((res) => {
+                            if (!res.code) {
+                                this.$emit('closed', true)
+                                this.$message({
+                                    message: res.msg,
+                                    type: 'success'
+                                })
+                            } else {
+                                this.$msgbox({
+                                    message: res.msg,
+                                    type: 'error'
+                                })
+                            }
+                        })
+                    }
                 } else {
                     return false
                 }

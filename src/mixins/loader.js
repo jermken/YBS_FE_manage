@@ -4,6 +4,7 @@ const interfaces = {
     register: '/api/register',
     passwordChange: '/api/password_change',
     login: '/api/login',
+    loginOut: '/api/out_login',
     // 员工
     getStaffList: '/api/get_staff',
     addStaff: '/api/add_staff',
@@ -55,11 +56,9 @@ const interfaces = {
 const loader = {
     methods: {
         get: function(url, params) {
-            let keys = params? Object.keys(params) : []
-            let vals = params? Object.value(params) : []
             let arr = []
-            for(let i = 0; i < keys.length; i++) {
-                arr.push(`${keys[i]}=${vals[i]}`)
+            for (let i in params) {
+                arr.push(`${i}=${params[i]}`)
             }
             url = `${interfaces[url]}?${arr.join('&')}`
             return new Promise((resolve, reject) => {
@@ -67,9 +66,17 @@ const loader = {
                     if (res.status < 500) {
                         resolve(res.data)
                     } else {
+                        this.$message({
+                            type: 'error',
+                            message: '服务器异常，请稍后重试'
+                        })
                         reject('服务器异常，请稍后重试')
                     }
                 }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: err
+                    })
                     reject(err)
                 })
             })
@@ -80,9 +87,17 @@ const loader = {
                     if (res.status < 500) {
                         resolve(res.data)
                     } else {
+                        this.$message({
+                            type: 'error',
+                            message: '服务器异常，请稍后重试'
+                        })
                         reject('服务器异常，请稍后重试')
                     }
                 }).catch((err) => {
+                    this.$message({
+                        type: 'error',
+                        message: err
+                    })
                     reject(err)
                 })
             })

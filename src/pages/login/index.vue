@@ -59,6 +59,7 @@
 <script>
 import loader from '@/mixins/loader'
 import md5 from 'js-md5'
+import moment from 'moment'
 
 export default {
     name: 'Login',
@@ -75,18 +76,15 @@ export default {
             registerRule: {
                 name: [{
                     required: true,
-                    message: '用户名不能为空',
-                    trigger: 'blur'
+                    message: '用户名不能为空'
                 }],
                 password: [{
                     required: true,
-                    message: '密码不能为空',
-                    trigger: 'blur'
+                    message: '密码不能为空'
                 }],
                 repassword: [{
                     required: true,
-                    message: '密码不能为空',
-                    trigger: 'blur'
+                    message: '密码不能为空'
                 }]
             },
             changeFormInfo: {
@@ -98,23 +96,19 @@ export default {
             changeRule: {
                 name: [{
                     required: true,
-                    message: '用户名不能为空',
-                    trigger: 'blur'
+                    message: '用户名不能为空'
                 }],
                 oldpassword: [{
                     required: true,
-                    message: '原密码必填',
-                    trigger: 'blur'
+                    message: '原密码必填'
                 }],
                 newpassword: [{
                     required: true,
-                    message: '新密码不能为空',
-                    trigger: 'blur'
+                    message: '新密码不能为空'
                 }],
                 renewpassword: [{
                     required: true,
-                    message: '新密码不能为空',
-                    trigger: 'blur'
+                    message: '新密码不能为空'
                 }]
             },
             loginFormInfo: {
@@ -124,13 +118,11 @@ export default {
             loginRule: {
                 name: [{
                     required: true,
-                    message: '用户名不能为空',
-                    trigger: 'blur'
+                    message: '用户名不能为空'
                 }],
                 password: [{
                     required: true,
-                    message: '密码不能为空',
-                    trigger: 'blur'
+                    message: '密码不能为空'
                 }]
             }
         }
@@ -145,23 +137,27 @@ export default {
             let $form = this.$refs.registerForm
             $form.validate((valid) => {
                 if (valid) {
-                    console.log(valid)
+                    let now = moment().format('YYYY-MM-DD HH:mm:ss')
                     this.post('register', {
                         name: this.registerFormInfo.name,
                         password: md5(this.registerFormInfo.password),
-                        repassword: md5(this.registerFormInfo.repassword)
+                        repassword: md5(this.registerFormInfo.repassword),
+                        create_time: now,
+                        update_time: now
                     }).then((res) => {
-                        console.log(res)
                         if (!res.code) {
-                            this.$success('注册成功').then(() => {
-                                $form.resetFields()
-                                this.$route.push('/login')
+                            this.$message({
+                                message: '注册成功',
+                                type: 'success'
                             })
+                            $form.resetFields()
+                            this.$router.push('/login')
                         } else {
-                            this.$message(res.msg)
+                            this.$msgbox({
+                                type: 'error',
+                                message: res.msg
+                            })
                         }
-                    }).catch((err) => {
-                        this.$message(err)
                     })
                 } else {
                     return false
@@ -172,24 +168,26 @@ export default {
             let $form = this.$refs.changeForm
             $form.validate((valid) => {
                 if (valid) {
-                    console.log(valid)
                     this.post('passwordChange', {
                         name: this.changeFormInfo.name,
                         oldpassword: md5(this.changeFormInfo.oldpassword),
                         newpassword: md5(this.changeFormInfo.newpassword),
-                        renewpassword: md5(this.changeFormInfo.renewpassword)
+                        renewpassword: md5(this.changeFormInfo.renewpassword),
+                        update_time: moment().format('YYYY-MM-DD HH:mm:ss')
                     }).then((res) => {
-                        console.log(res)
                         if (!res.code) {
-                            this.$message('密码修改成功').then(() => {
-                                $form.resetFields()
-                                this.$route.push('/login')
+                            this.$message({
+                                message: '密码修改成功',
+                                type: 'success'
                             })
+                            $form.resetFields()
+                            this.$router.push('/login')
                         } else {
-                            this.$message(res.msg)
+                            this.$msgbox({
+                                type: 'error',
+                                message: res.msg
+                            })
                         }
-                    }).catch((err) => {
-                        this.$message(err)
                     })
                 } else {
                     return false
@@ -206,12 +204,14 @@ export default {
                     }).then((res) => {
                         console.log(res)
                         if (!res.code) {
-                            this.$route.push('/payment')
+                            localStorage.setItem('sys_username', this.loginFormInfo.name)
+                            this.$router.push('/payment')
                         } else {
-                            this.$message(res.msg)
+                            this.$msgbox({
+                                type: 'error',
+                                message: res.msg
+                            })
                         }
-                    }).catch((err) => {
-                        this.$message(err)
                     })
                 } else {
                     return false
