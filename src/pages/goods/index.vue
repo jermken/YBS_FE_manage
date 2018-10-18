@@ -144,6 +144,11 @@ export default {
             let params = obj || {}
             console.log(params, 8888888)
             // TODO: 拉取产品列表
+            // this.get('getGoodsList').then((res) => {
+            //     console.log(res)
+            //     this.goodsList = res.data
+            //     this.total = res.total
+            // })
         },
         queryData() {
             this.page = 1
@@ -185,13 +190,6 @@ export default {
     mounted() {
         this.fetchData()
         console.log(this)
-        this.get('getGoodsList').then((res) => {
-            console.log(res)
-            this.goodsList = res.data
-            this.total = res.total
-        }).catch((err) => {
-            console.log(err)
-        })
     }
 }
 </script>

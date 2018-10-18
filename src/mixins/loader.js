@@ -60,6 +60,7 @@ const loader = {
             for (let i in params) {
                 arr.push(`${i}=${params[i]}`)
             }
+            arr.push(`timestamp=${+new Date()}`)
             url = `${interfaces[url]}?${arr.join('&')}`
             return new Promise((resolve, reject) => {
                 axios.get(url).then((res) => {

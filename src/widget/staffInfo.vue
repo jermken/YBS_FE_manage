@@ -38,6 +38,7 @@
 import { mapGetters } from 'vuex'
 import loader from '@/mixins/loader'
 import moment from 'moment'
+import utils from '@/utils/index'
 
 export default {
     // 员工信息详情组件
@@ -48,6 +49,13 @@ export default {
         show: false
     },
     data() {
+        let validTell = (rule, value, cb) => {
+            if (utils.isValidateTell(value)) {
+                cb()
+            } else {
+                cb(new Error('手机号格式有误'))
+            }
+        }
         return {
             roleArr: [{
                 label: '员工',
@@ -74,8 +82,7 @@ export default {
                     trigger: 'blur'
                 }],
                 tell: [{
-                    required: true,
-                    message: '手机必填',
+                    validator: validTell,
                     trigger: 'blur'
                 }],
                 sexual: [{

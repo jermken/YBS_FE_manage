@@ -155,8 +155,8 @@ export default {
             axios.interceptors.response.use((res) => {
                 // 未登录控制器
                 if (res.data && res.data.code === 401) {
-                    return this.$router.push('/login')
-                    // return Promise.reject('未登录')
+                    this.$router.push('/login')
+                    return {data: {code: 100, msg: '未登录'}, status: 200}
                 }
                 return res
             })

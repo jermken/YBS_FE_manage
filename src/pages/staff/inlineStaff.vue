@@ -6,10 +6,11 @@
                     <el-input v-model="queryInfo.name" placeholder="请输入姓名"></el-input>
                 </el-form-item>
                 <el-form-item label="工号">
-                    <el-input  v-model="queryInfo.staffCode" placeholder="请输入工号"></el-input>
+                    <el-input  v-model="queryInfo.id" placeholder="请输入工号"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" icon="el-icon-search" @click="queryData">搜索</el-button>
+                    <el-button @click="clearQuery">清除</el-button>
                 </el-form-item>
                 <el-form-item style="float:right;">
                     <el-button @click="addStaff" plain>新增</el-button>
@@ -18,6 +19,7 @@
         </div>
         <div class="page-content-wrapper">
             <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
+                <el-table-column prop="id" label="工号" width="120"></el-table-column>
                 <el-table-column prop="name" label="姓名" width="220"></el-table-column>
                 <el-table-column  prop="sexual" label="性别" width="220">
                     <template slot-scope="scope">
@@ -41,7 +43,7 @@
                 <el-pagination
                     background
                     layout="prev, pager, next"
-                    :total="tableData.length"
+                    :total="total"
                     :page-size="pageSize"
                     :pager-count="7"
                     :current-page="page"
@@ -73,7 +75,8 @@ export default {
                 boss: '老板'
             },
             tableData: [],
-            pageSize: 2,
+            total: 0,
+            pageSize: 8,
             page: 1,
             queryInfo: {
                 name: '',
@@ -88,6 +91,21 @@ export default {
     },
     methods: {
         queryData() {
+            let params = {
+                ...this.queryInfo,
+                page: 1,
+                pageSize: this.pageSize
+            }
+            this.fetchData(params).then(()=> {
+                this.page = 1
+            })
+        },
+        clearQuery() {
+            this.queryInfo = {
+                name: '',
+                id: '',
+                status: 1
+            }
             let params = {
                 ...this.queryInfo,
                 page: 1,
@@ -115,11 +133,12 @@ export default {
             }
             console.log(params, 'fetch stafflist params')
             this.get('getStaffList',{
-                ...this.queryInfo
+                ...params
             }).then((res) => {
                 console.log(res, 'stafflist info')
                 if(!res.code) {
                     this.tableData = res.data
+                    this.total = res.total
                 } else {
                     this.$msgbox({
                         message: res.msg,
