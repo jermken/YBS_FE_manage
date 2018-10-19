@@ -8,7 +8,7 @@ export default {
     isValidatePrice(str) {
         str = str.toString()
         let str1 = str.replace('.', '')
-        if (!str || !/\d{1,}/.test(str1) || /^[0-9]+(.[0-9]{0,2})?$/.test(str)) {
+        if (!str || !/\d{1,}/.test(str1) || !/^[0-9]+(.[0-9]{0,2})?$/.test(str)) {
             return false
         }
         return true

@@ -10,11 +10,13 @@ const interfaces = {
     addStaff: '/api/add_staff',
     updateStaff: '/api/update_staff',
     deleteStaff: '/api/delete_staff',
+    getStaffDetail: '/api/get_staff_detail',
     // 产品
     getGoodsList: '/api/get_goods',
     addGoods: '/api/add_goods',
     updateGoods: '/api/update_goods',
     deleteGoods: '/api/delete_goods',
+    getGoodsDetail: '/api/get_goods_detail',
     // 用户
     getUserList: '/api/get_user',
     addUserList: '/api/add_user',
@@ -50,7 +52,9 @@ const interfaces = {
     getDocument: '/api/get_document',
     addDocument: '/api/add_document',
     updateDocument: '/api/update_document',
-    deleteDocument: '/api/delete_document'
+    deleteDocument: '/api/delete_document',
+    // 上传凭证接口
+    getUploadToken: '/api/get_upload_token'
 }
 
 const loader = {

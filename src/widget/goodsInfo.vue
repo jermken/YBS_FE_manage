@@ -20,8 +20,24 @@
                 <el-radio :label="2">全部</el-radio>
             </el-radio-group>
         </el-form-item>
-        <el-form-item label="备注" label-width="80px" prop="desc">
-            <el-input type="textarea" v-model="goodsInfo.desc" :rows="3" :autosize="false"></el-input>
+        <el-form-item label="上传图片">
+            <img style="width: 100px;height: 100px;" v-if="imageUrl" :src="imageUrl"/>
+            <el-upload
+            v-else
+            action=""
+            :on-change="handleImgChange"
+            :http-request="uploadFile"
+            :before-upload="beforeAvatarUpload"
+            :show-file-list="false"
+            :auto-upload="false"
+            list-type="picture-card"
+            >
+                <i class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
+            <el-button @click="uploadFile">上传</el-button>
+        </el-form-item>
+        <el-form-item label="备注" label-width="80px" prop="remark">
+            <el-input type="textarea" v-model="goodsInfo.remark" :rows="3" :autosize="false"></el-input>
         </el-form-item>
     </el-form>
     <span slot="footer">
@@ -32,33 +48,53 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import utils from '@/utils/index'
+import loader from '@/mixins/loader'
+import * as qiniu from 'qiniu-js'
 
 export default {
     // 商品详情组件
     name: 'GoodsInfo',
+    mixins: [loader],
     props: {
         goodsId: null,
         show: false
     },
     data() {
+        let validPrice = (rule, value, cb) => {
+            if (utils.isValidatePrice(value)) {
+                cb()
+            } else {
+                cb(new Error('价格格式有误，最多两位小数'))
+            }
+        }
+        let validMinNum = (rule, value, cb) => {
+            if (utils.isInt(value)) {
+                cb()
+            } else {
+                cb(new Error('请输入正整数'))
+            }
+        }
         return {
+            imageUrl: '',
+            file: null,
+            imgVisible: false,
             goodsInfo: {
                 name: '',
                 price: '',
                 size: '',
                 minNum: '',
                 status: '',
-                desc: ''
+                remark: ''
             },
             formRules:{
                 name: [{
                     required: true,
-                    message: '姓名不能为空',
+                    message: '产品名称必填',
                     trigger: 'blur'
                 }],
                 price: [{
-                    required: true,
-                    message: '请填写价格',
+                    validator: validPrice,
                     trigger: 'blur'
                 }],
                 size: [{
@@ -67,8 +103,7 @@ export default {
                     trigger: 'blur'
                 }],
                 minNum: [{
-                    required: true,
-                    message: '请输入库存警线',
+                    validator: validMinNum,
                     trigger: 'blur'
                 }],
                 status: [{
@@ -93,7 +128,69 @@ export default {
     methods: {
         async fetchGoodsInfo(id) {
             console.log(id)
-            // TODO: 拉取产品信息
+            this.get('getGoodsDetail', {
+                id
+            }).then((res) => {
+                if (!res.code) {
+                    this.goodsInfo = res.data
+                } else {
+                    this.$msgbox({
+                        message: res.msg,
+                        type: 'error'
+                    })
+                }
+            })
+        },
+        handleImgChange(file) {
+            console.log(file, 44444)
+            this.imageUrl = file.url
+            this.file = file
+        },
+        uploadFile() {
+            console.log(66666666)
+            this.uploader(this.file.raw, this.file.name, {}, {}).then(obser => {
+                obser.subscribe({
+                    error(err) {
+                        new Error(err)
+                    },
+                    complete(res) {
+                        console.log(res, '上传成功拉')
+                    }
+                })
+            })
+        },
+        fetchUploadToken() {
+            return new Promise((resolve, reject) => {
+                this.get('getUploadToken', {}).then(res => {
+                    if (!res.code) {
+                        resolve(res.data.uploadToken)
+                    } else {
+                        reject('获取token出错了')
+                    }
+                })
+            })
+        },
+        beforeAvatarUpload(file) {
+            console.log(file, 5555555)
+            this.imageUrl = URL.createObjectURL(file.raw)
+        },
+        uploader(file, key, putExtra, config) {
+            return new Promise((resolve, reject) => {
+                this.fetchUploadToken().then(token => {
+                    let u = qiniu.upload(file, key, token, putExtra, config)
+                    resolve(u)
+                }).catch(err => {
+                    this.$msgbox({
+                        message: err,
+                        type: 'error'
+                    })
+                })
+            })
+        },
+        uploadEvent() {
+            this.uploader().then(rs => {
+                console.log(rs, 111111111)
+            })
         },
         cancelEvent() {
             this.$emit('closed')
@@ -101,9 +198,41 @@ export default {
         confirmEvent(ref) {
             this.$refs[ref].validate((valid) => {
                 if (valid) {
-                    // TODO: 新增或修改产品信息
-                    alert('success')
-                    this.$emit('closed', true)
+                    if (this.goodsId) {
+                        this.post('updateGoods', {
+                            ...this.goodsInfo
+                        }).then(res => {
+                            if (!res.code) {
+                                this.$message({
+                                    type: 'success',
+                                    message: res.msg
+                                })
+                                this.$emit('closed', true)
+                            } else {
+                                this.$msgbox({
+                                    type: 'error',
+                                    message: res.msg
+                                })
+                            }
+                        })
+                    } else {
+                        this.post('addGoods', {
+                            ...this.goodsInfo
+                        }).then(res => {
+                            if (!res.code) {
+                                this.$message({
+                                    type: 'success',
+                                    message: res.msg
+                                })
+                                this.$emit('closed', true)
+                            } else {
+                                this.$msgbox({
+                                    type: 'error',
+                                    message: res.msg
+                                })
+                            }
+                        })
+                    }
                 } else {
                     return false
                 }

@@ -20,13 +20,14 @@
         <div class="page-content-wrapper">
             <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
                 <el-table-column prop="id" label="工号" width="150"></el-table-column>
-                <el-table-column prop="name" label="姓名" width="220"></el-table-column>
-                <el-table-column  prop="sexual" label="性别" width="220">
+                <el-table-column prop="name" label="姓名" width="150"></el-table-column>
+                <el-table-column  prop="sexual" label="性别" width="150">
                     <template slot-scope="scope">
                         <span>{{scope.row.sexual === '1' ? '女' : '男'}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column  prop="birthday" label="出生日期" width="250"></el-table-column>
+                <el-table-column  prop="tell" label="联系方式" width="150"></el-table-column>
+                <el-table-column  prop="birthday" label="出生日期" width="200"></el-table-column>
                 <el-table-column  prop="role" label="角色" width="200">
                     <template slot-scope="scope">
                         <span>{{role[scope.row.role]}}</span>

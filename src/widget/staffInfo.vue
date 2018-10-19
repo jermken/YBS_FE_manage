@@ -2,7 +2,7 @@
 <el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="员工信息" width="500px" :before-close="beforeClose" @close="resetFields('staffInfoForm')">
     <el-form :model="staffInfo" status-icon :rules="formRules" ref="staffInfoForm" :size="globalSize">
         <el-form-item required label="姓名" label-width="80px" prop="name">
-            <el-input :disabled="staffId" placeholder="请输入姓名" width="60%" v-model="staffInfo.name"></el-input>
+            <el-input :disabled="staffId? true : false" placeholder="请输入姓名" width="60%" v-model="staffInfo.name"></el-input>
         </el-form-item>
         <el-form-item required label="联系方式" label-width="80px" prop="tell">
             <el-input placeholder="请输入手机号" width="60%" v-model="staffInfo.tell"></el-input>
@@ -122,12 +122,12 @@ export default {
     methods: {
         async fetchStaffInfo(id) {
             console.log(id, 'staff detail id')
-            this.get('getStaffList', {
+            this.get('getStaffDetail', {
                 id
             }).then((res) => {
                 if(!res.code) {
                     console.log(res, 'staff detail info')
-                    this.staffInfo = res.data[0]
+                    this.staffInfo = res.data
                 } else {
                     this.$msgbox({
                         message: res.msg,

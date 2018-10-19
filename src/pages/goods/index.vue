@@ -9,7 +9,7 @@
                     <el-input  v-model="queryInfo.code" placeholder="请输入编码"></el-input>
                 </el-form-item>
                 <el-form-item label="状态">
-                    <el-radio-group v-model="queryInfo.status">
+                    <el-radio-group v-model="queryInfo.status" @change="queryData">
                         <el-radio :label="1">上架产品</el-radio>
                         <el-radio :label="0">下架产品</el-radio>
                         <el-radio :label="2">全部产品</el-radio>
@@ -36,11 +36,11 @@
                 </li>
             </ul>
         </div>
-        <div class="pagination-wrapper">
+        <div class="pagination-wrapper" v-if="goodsList.length">
             <el-pagination
                 background
                 layout="prev, pager, next"
-                :total="goodsList.length"
+                :total="total"
                 :page-size="pageSize"
                 :pager-count="7"
                 :current-page="page"
@@ -71,69 +71,10 @@ export default {
             },
             page: 1,
             pageSize: 8,
+            total: 0,
             goodsId: null,
             goodsInfoDialogVisible: false,
-            goodsList: [{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            },{
-                name: '面面膜面膜面膜面膜膜',
-                imgUrl: require('@/img/mianmo.png'),
-                price: '200.00',
-                size: '500ml',
-                minNum: 0
-            }]
+            goodsList: []
         }
     },
     computed: {
@@ -144,11 +85,13 @@ export default {
             let params = obj || {}
             console.log(params, 8888888)
             // TODO: 拉取产品列表
-            // this.get('getGoodsList').then((res) => {
-            //     console.log(res)
-            //     this.goodsList = res.data
-            //     this.total = res.total
-            // })
+            this.get('getGoodsList', {
+                ...params
+            }).then((res) => {
+                console.log(res)
+                this.goodsList = res.data
+                this.total = res.total
+            })
         },
         queryData() {
             this.page = 1
