@@ -85,7 +85,9 @@ export default {
                 size: '',
                 minNum: '',
                 status: '',
-                remark: ''
+                remark: '',
+                imgUrl: '',
+                num: 0
             },
             formRules:{
                 name: [{
@@ -142,7 +144,6 @@ export default {
             })
         },
         handleImgChange(file) {
-            console.log(file, 44444)
             this.imageUrl = file.url
             this.file = file
         },
@@ -154,6 +155,8 @@ export default {
                         new Error(err)
                     },
                     complete(res) {
+                        let imgUrl = `pggs8ltrt.bkt.cloudn.com/${res.key}`
+                        console.log(imgUrl)
                         console.log(res, '上传成功拉')
                     }
                 })
@@ -198,41 +201,56 @@ export default {
         confirmEvent(ref) {
             this.$refs[ref].validate((valid) => {
                 if (valid) {
-                    if (this.goodsId) {
-                        this.post('updateGoods', {
-                            ...this.goodsInfo
-                        }).then(res => {
-                            if (!res.code) {
-                                this.$message({
-                                    type: 'success',
-                                    message: res.msg
-                                })
-                                this.$emit('closed', true)
-                            } else {
-                                this.$msgbox({
-                                    type: 'error',
-                                    message: res.msg
-                                })
+                    let that = this
+                    this.uploader(this.file.raw, this.file.name, {}, {}).then(obser => {
+                        obser.subscribe({
+                            error(err) {
+                                new Error(err)
+                            },
+                            complete(res) {
+                                let imgUrl = `//pggs8ltrt.bkt.clouddn.com/${res.key}`
+                                if (that.goodsId) {
+                                    that.post('updateGoods', {
+                                        ...that.goodsInfo,
+                                        imgUrl: imgUrl
+                                    }).then(res => {
+                                        if (!res.code) {
+                                            that.$message({
+                                                type: 'success',
+                                                message: res.msg
+                                            })
+                                            that.$emit('closed', true)
+                                        } else {
+                                            that.$msgbox({
+                                                type: 'error',
+                                                message: res.msg
+                                            })
+                                        }
+                                    })
+                                } else {
+                                    that.post('addGoods', {
+                                        ...that.goodsInfo,
+                                        imgUrl: imgUrl
+                                    }).then(res => {
+                                        if (!res.code) {
+                                            that.$message({
+                                                type: 'success',
+                                                message: res.msg
+                                            })
+                                            that.$emit('closed', true)
+                                        } else {
+                                            that.$msgbox({
+                                                type: 'error',
+                                                message: res.msg
+                                            })
+                                        }
+                                    })
+                                }
+                                console.log(imgUrl)
+                                console.log(res, '上传成功拉')
                             }
                         })
-                    } else {
-                        this.post('addGoods', {
-                            ...this.goodsInfo
-                        }).then(res => {
-                            if (!res.code) {
-                                this.$message({
-                                    type: 'success',
-                                    message: res.msg
-                                })
-                                this.$emit('closed', true)
-                            } else {
-                                this.$msgbox({
-                                    type: 'error',
-                                    message: res.msg
-                                })
-                            }
-                        })
-                    }
+                    })
                 } else {
                     return false
                 }
