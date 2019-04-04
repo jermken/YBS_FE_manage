@@ -174,13 +174,10 @@ export default {
                 }
             }
             if (isValidate) {
-                let now = moment().format('YYYY-MM-DD HH:mm:ss')
                 this.post('register', {
                     name: this.registerFormInfo.name,
                     password: md5(this.registerFormInfo.password),
                     repassword: md5(this.registerFormInfo.repassword),
-                    create_time: now,
-                    update_time: now,
                     icode: this.registerFormInfo.icode
                 }).then((res) => {
                     if (!res.code) {
@@ -235,8 +232,7 @@ export default {
                     name: this.changeFormInfo.name,
                     oldpassword: md5(this.changeFormInfo.oldpassword),
                     newpassword: md5(this.changeFormInfo.newpassword),
-                    renewpassword: md5(this.changeFormInfo.renewpassword),
-                    update_time: moment().format('YYYY-MM-DD HH:mm:ss')
+                    renewpassword: md5(this.changeFormInfo.renewpassword)
                 }).then((res) => {
                     if (!res.code) {
                         this.$message({

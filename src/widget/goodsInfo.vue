@@ -20,13 +20,15 @@
                 <el-radio :label="2">全部</el-radio>
             </el-radio-group>
         </el-form-item>
-        <el-form-item label="上传图片">
+        <el-form-item label="上传图片" v-if="goodsInfo.imgUrl">
+            <img style="width: 100px;height: 100px;" :src="goodsInfo.imgUrl"/>
+        </el-form-item>
+        <el-form-item label="上传图片" v-else>
             <img style="width: 100px;height: 100px;" v-if="imageUrl" :src="imageUrl"/>
             <el-upload
             v-else
             action=""
             :on-change="handleImgChange"
-            :http-request="uploadFile"
             :before-upload="beforeAvatarUpload"
             :show-file-list="false"
             :auto-upload="false"
@@ -34,7 +36,6 @@
             >
                 <i class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
-            <el-button @click="uploadFile">上传</el-button>
         </el-form-item>
         <el-form-item label="备注" label-width="80px" prop="remark">
             <el-input type="textarea" v-model="goodsInfo.remark" :rows="3" :autosize="false"></el-input>
@@ -129,7 +130,6 @@ export default {
     },
     methods: {
         async fetchGoodsInfo(id) {
-            console.log(id)
             this.get('getGoodsDetail', {
                 id
             }).then((res) => {
@@ -147,21 +147,6 @@ export default {
             this.imageUrl = file.url
             this.file = file
         },
-        uploadFile() {
-            console.log(66666666)
-            this.uploader(this.file.raw, this.file.name, {}, {}).then(obser => {
-                obser.subscribe({
-                    error(err) {
-                        new Error(err)
-                    },
-                    complete(res) {
-                        let imgUrl = `pggs8ltrt.bkt.cloudn.com/${res.key}`
-                        console.log(imgUrl)
-                        console.log(res, '上传成功拉')
-                    }
-                })
-            })
-        },
         fetchUploadToken() {
             return new Promise((resolve, reject) => {
                 this.get('getUploadToken', {}).then(res => {
@@ -174,7 +159,6 @@ export default {
             })
         },
         beforeAvatarUpload(file) {
-            console.log(file, 5555555)
             this.imageUrl = URL.createObjectURL(file.raw)
         },
         uploader(file, key, putExtra, config) {
@@ -190,11 +174,6 @@ export default {
                 })
             })
         },
-        uploadEvent() {
-            this.uploader().then(rs => {
-                console.log(rs, 111111111)
-            })
-        },
         cancelEvent() {
             this.$emit('closed')
         },
@@ -208,7 +187,7 @@ export default {
                                 new Error(err)
                             },
                             complete(res) {
-                                let imgUrl = `//pggs8ltrt.bkt.clouddn.com/${res.key}`
+                                let imgUrl = `//manage.jermken.com/${res.key}`
                                 if (that.goodsId) {
                                     that.post('updateGoods', {
                                         ...that.goodsInfo,
@@ -246,8 +225,6 @@ export default {
                                         }
                                     })
                                 }
-                                console.log(imgUrl)
-                                console.log(res, '上传成功拉')
                             }
                         })
                     })

@@ -142,12 +142,10 @@ export default {
         confirmEvent(ref) {
             this.$refs[ref].validate((valid) => {
                 if (valid) {
-                    let now = moment().format('YYYY-MM-DD HH:mm:ss')
                     if (this.staffId) {
                         this.post('updateStaff',{
                             id: this.staffId,
-                            ...this.staffInfo,
-                            update_time: now
+                            ...this.staffInfo
                         }).then((res) => {
                             if(!res.code) {
                                 this.$emit('closed', true)
@@ -164,9 +162,7 @@ export default {
                         })
                     } else {
                         this.post('addStaff',{
-                            ...this.staffInfo,
-                            create_time: now,
-                            update_time: now
+                            ...this.staffInfo
                         }).then((res) => {
                             if (!res.code) {
                                 this.$emit('closed', true)

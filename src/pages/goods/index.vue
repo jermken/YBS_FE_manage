@@ -83,14 +83,13 @@ export default {
     methods: {
         async fetchData(obj) {
             let params = obj || {}
-            console.log(params, 8888888)
-            // TODO: 拉取产品列表
             this.get('getGoodsList', {
                 ...params
             }).then((res) => {
-                console.log(res)
-                this.goodsList = res.data
-                this.total = res.total
+                if (!res.code) {
+                    this.goodsList = res.data
+                    this.total = res.total
+                }
             })
         },
         queryData() {
@@ -101,7 +100,6 @@ export default {
             this.goodsInfoDialogVisible = true
         },
         deleteGoods(e, id) {
-            console.log(id)
             e.stopPropagation()
             MessageBox.confirm('确认删除该产品', '提示', {
                 confirmButtonText: '确定',
@@ -109,10 +107,19 @@ export default {
                 type: 'warning',
                 center: true
             }).then(() => {
-                // TODO: 删除产品接口
-                MessageBox({
-                    type: 'success',
-                    message: '删除成功'
+                this.post('deleteGoods', { id }).then(res => {
+                    if (!res.code) {
+                        MessageBox({
+                            type: 'success',
+                            message: '删除成功'
+                        })
+                        this.queryData()
+                    } else {
+                        MessageBox({
+                            type: 'error',
+                            message: '删除失败'
+                        })
+                    }
                 })
             }).catch(() => {
             })
@@ -132,7 +139,6 @@ export default {
     },
     mounted() {
         this.fetchData()
-        console.log(this)
     }
 }
 </script>

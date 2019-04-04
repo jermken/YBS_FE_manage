@@ -9,9 +9,9 @@
                     <el-input  v-model="queryInfo.code" placeholder="请输入编码"></el-input>
                 </el-form-item>
                 <el-form-item label="状态">
-                    <el-radio-group v-model="queryInfo.numStatus">
-                        <el-radio label="1">库存不足</el-radio>
-                        <el-radio label="2">全部</el-radio>
+                    <el-radio-group v-model="queryInfo.safeStatus">
+                        <el-radio :label="0">库存不足</el-radio>
+                        <el-radio :label="1">全部</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item>
@@ -21,18 +21,21 @@
         </div>
         <div class="page-content-wrapper">
             <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
-                <el-table-column prop="code" label="编码" width="120"></el-table-column>
+                <el-table-column prop="id" label="编码" width="120"></el-table-column>
                 <el-table-column prop="name" label="产品名称" width="120"></el-table-column>
                 <el-table-column  prop="size" label="规格" width="120"></el-table-column>
-                <el-table-column  prop="type" label="品类" width="120"></el-table-column>
+                <el-table-column  prop="safeStatus" label="库存状态" width="120">
+                    <template slot-scope="scope" v-if="scope.row.safeStatus == 0">
+                        <el-tag type="danger">库存不足</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column  prop="price" label="售价" width="120">
                     <template slot-scope="scope">
                         <span>￥{{scope.row.price}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column  prop="safeNum" label="安全库存" width="120"></el-table-column>
+                <el-table-column  prop="minNum" label="安全库存" width="120"></el-table-column>
                 <el-table-column  prop="num" label="库存量" width="120"></el-table-column>
-                <el-table-column  prop="desc" label="备注" width="120"></el-table-column>
                 <el-table-column prop="action" label="操作">
                     <template slot-scope="scope">
                         <el-button type="text" :size="globalSize">入库记录</el-button>
@@ -55,6 +58,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import loader from '@/mixins/loader'
 
 export default {
     name: 'Store',
@@ -63,23 +67,15 @@ export default {
             queryInfo: {
                 name: '',
                 code: '',
-                numStatus: '2'
+                safeStatus: 1
             },
             page: 1,
             pageSize: 10,
-            tableData: [{
-                code: 'e423231',
-                name: '补水面膜',
-                size: '5片/盒',
-                type: '面膜',
-                price: '188.00',
-                safeNum: 5,
-                num: 13,
-                desc: '这是最新款面膜'
-            }],
+            tableData: [],
             total: 0
         }
     },
+    mixins: [loader],
     computed: {
         ...mapGetters(['globalSize']),
         isShowPagination() {
@@ -106,10 +102,14 @@ export default {
                 pageSize: this.pageSize,
                 name: '',
                 code: '',
-                numStatus: '2'
+                safeStatus: 1
             }
-            console.log(obj)
-            // TODO: 拉取库存列表
+            this.get('getStore', obj).then(res => {
+                if (!res.code) {
+                    this.tableData = res.data
+                    this.total = res.total
+                }
+            })
         },
         pageChangeEvent(val) {
             this.page = val
