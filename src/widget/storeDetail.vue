@@ -16,7 +16,7 @@
                         </el-select>
                     </template>
                 </el-table-column>
-                <el-table-column prop="code" label="编码"></el-table-column>
+                <el-table-column prop="id" label="编码"></el-table-column>
                 <el-table-column prop="size" label="规格"></el-table-column>
                 <el-table-column prop="num" label="当前库存"></el-table-column>
                 <el-table-column prop="action_num" :label="title+'数量'">
@@ -26,7 +26,7 @@
                 </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
-                        <el-button 
+                        <el-button
                             :disabled="!!detailId"
                             icon="el-icon-circle-plus"
                             circle
@@ -34,7 +34,7 @@
                             @click="addItem(scope.$index)"
                             >
                         </el-button>
-                        <el-button 
+                        <el-button
                             :disabled="!!detailId"
                             v-if="tableData.length !== 1 || scope.$index"
                             icon="el-icon-remove"
@@ -47,14 +47,20 @@
                 </el-table-column>
             </el-table>
         </div>
+        <span slot="footer">
+            <el-button @click="cancelEvent" :size="globalSize">取消</el-button>
+            <el-button @click="confirmEvent('goodsInfoForm')" :size="globalSize" type="primary">提交</el-button>
+        </span>
     </el-dialog>
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import loader from '@/mixins/loader'
 
 export default {
     // 入库或出库单详情组件
     name: 'StoreDetailDialog',
+    mixins: [loader],
     props: {
         show: {
             type: Boolean,
@@ -79,19 +85,12 @@ export default {
                 num: '',
                 action_num: ''
             }],
-            goodsList: [{
-                id: '2323',
-                name: '补水面膜',
-                size: '20片/盒',
-                num: 20,
-                code: '123456'
-            },{
-                id: '1212',
-                name: '洗面奶',
-                size: '300ml',
-                num: 15,
-                code: '654321'
-            }]
+            goodsList: [],
+            queryGoodsParams: {
+                name: '',
+                code: '',
+                status: 1
+            }
         }
     },
     computed: {
@@ -105,12 +104,27 @@ export default {
             id && this.fetchDetailInfo(id)
         }
     },
+    mounted() {
+        this.fetchGoodsList(this.queryGoodsParams)
+    },
     methods: {
+        async fetchGoodsList(params) {
+            this.get('getGoodsList', {
+                ...params
+            }).then((res) => {
+                if (!res.code) {
+                    this.goodsList = res.data
+                }
+            })
+        },
         async fetchDetailInfo(id) {
             console.log(id)
             // TODO: 拉取出/入库单详情
         },
         beforeClose() {
+            this.$emit('closed')
+        },
+        cancelEvent() {
             this.$emit('closed')
         },
         resetFields() {
@@ -156,6 +170,24 @@ export default {
                 size: '',
                 num: '',
                 action_num: ''
+            })
+        },
+        confirmEvent() {
+            let list = this.tableData.map(item => {
+                return {
+                    id: item.id,
+                    num: item.action_num
+                }
+            })
+            let params = {
+                list: JSON.stringify(list),
+                remark: '',
+                actioner: 'jermken'
+            }
+            this.post('createStore', params).then(res => {
+                if (!res.code) {
+
+                }
             })
         }
     }

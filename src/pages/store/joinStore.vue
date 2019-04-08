@@ -20,10 +20,11 @@
         </div>
         <div class="page-content-wrapper">
             <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
-                <el-table-column prop="action_date" label="操作时间" width="220"></el-table-column>
-                <el-table-column prop="auditor_date" label="审核时间" width="220">
+                <el-table-column prop="create_time" label="创建时间" width="220"></el-table-column>
+                <el-table-column prop="update_time" label="修改时间" width="220"></el-table-column>
+                <el-table-column prop="auditor_time" label="审核时间" width="220">
                     <template slot-scope="scope">
-                        <span>{{scope.row.auditor_date || '-'}}</span>
+                        <span>{{scope.row.auditor_time || '-'}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="actioner" label="入库人" width="150"></el-table-column>
@@ -92,21 +93,21 @@ export default {
             pageSize: 10,
             tableData: [{
                 action_date: '2018-09-01',
-                auditor_date: '2018-09-11',
+                auditor_time: '2018-09-11',
                 actioner: '小琴',
                 auditor: 'jermken',
                 status: '1',
                 desc: '第一次入库'
             },{
                 action_date: '2018-09-02',
-                auditor_date: '2018-09-12',
+                auditor_time: '2018-09-12',
                 actioner: '小婷',
                 auditor: 'jermken',
                 status: '2',
                 desc: '第二次入库'
             },{
                 action_date: '2018-09-03',
-                auditor_date: '2018-09-13',
+                auditor_time: '2018-09-13',
                 actioner: '小婕',
                 auditor: 'jermken',
                 status: '3',
