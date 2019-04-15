@@ -1,10 +1,17 @@
 <template>
-    <el-dialog :visible.sync="dialogShow" :close-on-click-modal="false" :title="title+'单详情'" width="1000px" :before-close="beforeClose" @close="resetFields">
+    <el-dialog :visible.sync="show" :close-on-click-modal="false" :title="title+'单详情'" width="1000px" :before-close="beforeClose" @close="resetFields">
         <div style="min-height: 400px;">
+            <el-form>
+                <el-form-item label="审核人" required>
+                    <el-select v-model="actioner" :size="globalSize" filterable placeholder="请选择审核人">
+                        <el-option v-for="item in sysUserList" :key="item.name" :disabled="item.role === 'staff'" :label="item.name" :value="item.name"></el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
             <el-table border style="width: 100%;" :size="globalSize" :data="tableData" height="450">
                 <el-table-column prop="name" label="产品名称">
                     <template slot-scope="scope">
-                        <el-select :size="globalSize" v-model="tableData[scope.$index].id" filterable :disabled="!!detailId" @change="(val) => selectItemGoods(val, scope.$index)">
+                        <el-select :size="globalSize" v-model="tableData[scope.$index].id" filterable @change="(val) => selectItemGoods(val, scope.$index)">
                             <el-option
                                 v-for="item in goodsList"
                                 :key="item.id"
@@ -21,13 +28,12 @@
                 <el-table-column prop="num" label="当前库存"></el-table-column>
                 <el-table-column prop="action_num" :label="title+'数量'">
                     <template slot-scope="scope">
-                        <el-input :size="globalSize" :disabled="!!detailId || !tableData[scope.$index].id" v-model="tableData[scope.$index].action_num"></el-input>
+                        <el-input :size="globalSize" :disabled="!tableData[scope.$index].id" v-model="tableData[scope.$index].action_num"></el-input>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
                         <el-button
-                            :disabled="!!detailId"
                             icon="el-icon-circle-plus"
                             circle
                             :size="globalSize"
@@ -35,7 +41,6 @@
                             >
                         </el-button>
                         <el-button
-                            :disabled="!!detailId"
                             v-if="tableData.length !== 1 || scope.$index"
                             icon="el-icon-remove"
                             circle
@@ -47,9 +52,9 @@
                 </el-table-column>
             </el-table>
         </div>
-        <span slot="footer">
+        <span slot="footer" class="dialog-footer">
             <el-button @click="cancelEvent" :size="globalSize">取消</el-button>
-            <el-button @click="confirmEvent('goodsInfoForm')" :size="globalSize" type="primary">提交</el-button>
+            <el-button @click="confirmEvent('goodsInfoForm')" v-if="status == 1" :size="globalSize" type="primary" :loading="loading">提交</el-button>
         </span>
     </el-dialog>
 </template>
@@ -62,20 +67,11 @@ export default {
     name: 'StoreDetailDialog',
     mixins: [loader],
     props: {
-        show: {
-            type: Boolean,
-            required: true
-        },
-        detailId: {
-            type: String,
-            required: false
-        },
         title: {
             type: String,
             required: true
         }
     },
-
     data() {
         return {
             tableData: [{
@@ -90,42 +86,76 @@ export default {
                 name: '',
                 code: '',
                 status: 1
-            }
+            },
+            status: 1,
+            actioner: '',
+            sysUserList: [],
+            loading: false,
+            detailId: '',
+            show: false
         }
     },
     computed: {
-        ...mapGetters(['globalSize']),
-        dialogShow: function() {
-            return this.show
-        }
-    },
-    watch: {
-        'detailId': function(id) {
-            id && this.fetchDetailInfo(id)
-        }
+        ...mapGetters(['globalSize'])
     },
     mounted() {
-        this.fetchGoodsList(this.queryGoodsParams)
+        this.getSysUserList()
     },
     methods: {
-        async fetchGoodsList(params) {
-            this.get('getGoodsList', {
+        fetchGoodsList(params) {
+            return this.get('getGoodsList', {
                 ...params
             }).then((res) => {
                 if (!res.code) {
                     this.goodsList = res.data
+                    return res
                 }
             })
         },
         async fetchDetailInfo(id) {
-            console.log(id)
-            // TODO: 拉取出/入库单详情
+            this.get('storeDetail',{ id }).then(res => {
+                if (!res.code) {
+                    let data = []
+                    let list = JSON.parse(res.data.list) || []
+                    this.status = res.data.status
+                    list.forEach(item => {
+                        this.goodsList.forEach(item2 => {
+                            if (item.id == item2.id) {
+                                let its = JSON.parse(JSON.stringify(item2))
+                                its.action_num = item.num
+                                data.push(its)
+                            }
+                        })
+                    })
+                    this.tableData = data
+                    this.actioner = res.data.actioner
+                }
+            })
+        },
+        async open(id) {
+            if (id) {
+                this.detailId  = id
+                let res = await this.fetchGoodsList(this.queryGoodsParams)
+                if (!res.code) {
+                    this.fetchDetailInfo(id)
+                }
+            }
+            this.show = true
+        },
+        getSysUserList() {
+            this.get('getStaffList').then(res => {
+                if (!res.code) {
+                    this.sysUserList = res.data
+                }
+            })
         },
         beforeClose() {
-            this.$emit('closed')
+            this.show = false
+            this.tableData = []
+            this.actioner = ''
         },
         cancelEvent() {
-            this.$emit('closed')
+            this.show = false
         },
         resetFields() {
             this.tableData = [{
@@ -151,7 +181,7 @@ export default {
         },
         setGoodsList() {
             this.goodsList = this.goodsList.map((item) => {
-                item.disabled = this.tableData.some((i) => { 
+                item.disabled = this.tableData.some((i) => {
                     return i.id === item.id
                 }) ? true : false
                 return item
@@ -173,6 +203,7 @@ export default {
             })
         },
         confirmEvent() {
+            this.loading = true
             let list = this.tableData.map(item => {
                 return {
                     id: item.id,
@@ -182,12 +213,30 @@ export default {
             let params = {
                 list: JSON.stringify(list),
                 remark: '',
-                actioner: 'jermken'
+                actioner: this.actioner,
+                status: 1
             }
-            this.post('createStore', params).then(res => {
+            let api = this.detailId ? 'updateStore' : 'createStore'
+            if (this.detailId) {
+                params.id = this.detailId
+            }
+            this.post(api, params).then(res => {
                 if (!res.code) {
-
+                    this.$message({
+                        type: 'success',
+                        message: `入库单${this.detailId? '修改' : '创建'}成功`
+                    })
+                    this.show = false
+                    this.$emit('closed', true)
+                } else {
+                    this.$message({
+                        type: 'error',
+                        message: res.msg
+                    })
                 }
+                this.loading = false
+            }).catch(err => {
+                this.loading = false
             })
         }
     }

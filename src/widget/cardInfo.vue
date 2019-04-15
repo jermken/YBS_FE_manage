@@ -7,6 +7,13 @@
         <el-form-item required label="卡类价格" label-width="80px" prop="price">
             <el-input placeholder="请输入价格" width="60%" v-model="cardInfo.price"></el-input>
         </el-form-item>
+        <el-form-item required label="赠送金额" label-width="80px" prop="price">
+            <el-input placeholder="请输入价格" width="60%" v-model="cardInfo.price"></el-input>
+        </el-form-item>
+        <el-form-item required label="激活" label-width="80px" prop="price">
+            <el-switch v-model="cardInfo.status" active-color="#13ce66" inactive-color="#ff4949">
+            </el-switch>
+        </el-form-item>
         <el-form-item label="备注" label-width="80px" prop="desc">
             <el-input type="textarea" v-model="cardInfo.desc" :rows="3" :autosize="false"></el-input>
         </el-form-item>
@@ -34,7 +41,7 @@ export default {
                 price: '',
                 size: '',
                 minNum: '',
-                status: '',
+                status: false,
                 desc: ''
             },
             formRules:{

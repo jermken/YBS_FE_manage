@@ -22,6 +22,7 @@ const interfaces = {
     addUserList: '/api/add_user',
     updateUser: '/api/update_user',
     deleteUser: '/api/delete_user',
+    getUserDetail: '/api/get_user_detail',
     // 卡类
     getCardList: '/api/get_card',
     addCard: '/api/add_card',
@@ -62,6 +63,7 @@ const loader = {
     methods: {
         get: function(url, params) {
             let arr = []
+            params = params || {}
             for (let i in params) {
                 arr.push(`${i}=${params[i]}`)
             }

@@ -9,7 +9,7 @@
                     <el-input  v-model="queryInfo.code" placeholder="请输入编码"></el-input>
                 </el-form-item>
                 <el-form-item label="状态">
-                    <el-radio-group v-model="queryInfo.safeStatus">
+                    <el-radio-group v-model="queryInfo.status" @change="queryData">
                         <el-radio :label="0">库存不足</el-radio>
                         <el-radio :label="1">全部</el-radio>
                     </el-radio-group>
@@ -23,9 +23,9 @@
             <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
                 <el-table-column prop="id" label="编码" width="120"></el-table-column>
                 <el-table-column prop="name" label="产品名称" width="120"></el-table-column>
-                <el-table-column  prop="size" label="规格" width="120"></el-table-column>
-                <el-table-column  prop="safeStatus" label="库存状态" width="120">
-                    <template slot-scope="scope" v-if="scope.row.safeStatus == 0">
+                <el-table-column prop="size" label="规格" width="120"></el-table-column>
+                <el-table-column label="库存状态" width="120">
+                    <template slot-scope="scope" v-if="scope.row.num - scope.row.minNum <= 0">
                         <el-tag type="danger">库存不足</el-tag>
                     </template>
                 </el-table-column>
@@ -46,9 +46,8 @@
                 <el-pagination
                     background
                     layout="prev, pager, next"
-                    :total="tableData.length"
+                    :total="total"
                     :page-size="pageSize"
-                    :pager-count="7"
                     :current-page="page"
                     @current-change="pageChangeEvent">
                 </el-pagination>
@@ -67,7 +66,7 @@ export default {
             queryInfo: {
                 name: '',
                 code: '',
-                safeStatus: 1
+                status: 1
             },
             page: 1,
             pageSize: 10,
@@ -102,9 +101,9 @@ export default {
                 pageSize: this.pageSize,
                 name: '',
                 code: '',
-                safeStatus: 1
+                status: 1
             }
-            this.get('getStore', obj).then(res => {
+            this.get('getGoodsStore', obj).then(res => {
                 if (!res.code) {
                     this.tableData = res.data
                     this.total = res.total

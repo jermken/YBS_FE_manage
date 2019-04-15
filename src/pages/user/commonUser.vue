@@ -19,131 +19,125 @@
         <div class="page-content-wrapper">
             <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
                 <el-table-column prop="name" label="姓名" width="100"></el-table-column>
-                <el-table-column prop="date" label="注册日期" width="150"></el-table-column>
+                <el-table-column prop="create_time" label="注册日期" width="150"></el-table-column>
                 <el-table-column  prop="sexual" label="性别" width="80">
                     <template slot-scope="scope">
-                        <span>{{scope.row.sexual === '1' ? '女' : '男'}}</span>
+                        <span>{{scope.row.sexual === 1 ? '女' : '男'}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column  prop="tell" label="手机号" width="100"></el-table-column>
-                <el-table-column  prop="even_amount" label="客单价" width="80"></el-table-column>
+                <el-table-column  prop="tell" label="生日" width="100"></el-table-column>
+                <el-table-column  prop="card_amount" label="卡内余额" width="100"></el-table-column>
+                <el-table-column  prop="present_amount" label="赠送金额" width="100"></el-table-column>
                 <el-table-column  prop="consume_total" label="消费总额" width="100"></el-table-column>
                 <el-table-column  prop="consume_times" label="消费次数" width="80"></el-table-column>
-                <el-table-column  prop="last_consume" label="上次消费" width="150"></el-table-column>
-                <el-table-column  prop="no_pay" label="未付款额" width="80"></el-table-column>
                 <el-table-column  prop="points" label="积分" width="80"></el-table-column>
-                <el-table-column  prop="desc" label="备注" width="120">
+                <el-table-column  prop="remark" label="备注" width="120">
                     <template slot-scope="scope">
-                        <el-popover :content="scope.row.desc" trigger="hover" width="150" placement="top">
-                            <div class="bill-desc" slot="reference">{{scope.row.desc}}</div>
+                        <el-popover :content="scope.row.remark" trigger="hover" width="150" placement="top">
+                            <div class="bill-desc" slot="reference">{{scope.row.remark}}</div>
                         </el-popover>
                     </template>
                 </el-table-column>
                 <el-table-column  prop="action" label="操作">
                     <template slot-scope="scope">
-                        <el-button type="text" :size="globalSize" @click="editUserInfo(scope.row.id)">编辑</el-button>
-                        <el-button type="text" :size="globalSize" @click="showUserInfo(scope.row.id)">详情</el-button>
+                        <el-button type="text" :size="globalSize" @click="showUserInfo(scope.row.id, 'editor')">编辑</el-button>
+                        <el-button type="text" :size="globalSize" @click="showUserInfo(scope.row.id, 'detail')">详情</el-button>
                         <el-button type="text" :size="globalSize" @click="deleteUser(scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
-            <div class="pagination-wrapper" v-if="isShowPagination">
+            <div class="pagination-wrapper" v-if="total">
                 <el-pagination
                     background
                     layout="prev, pager, next"
-                    :total="tableData.length"
-                    :page-size="pageSize"
-                    :pager-count="7"
-                    :current-page="page"
+                    :total="total"
+                    :page-size="queryInfo.pageSize"
+                    :current-page="queryInfo.page"
                     @current-change="pageChangeEvent">
                 </el-pagination>
             </div>
         </div>
-        <user-info-dialog :config="detailDialogConf" @closed="closeUserInfoDialog"/>
+        <user-info-dialog ref="userInfo" @closed="closeUserInfoDialog"/>
     </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
 import UserInfoDialog from '@/widget/userInfo'
 import { MessageBox } from 'element-ui'
+import loader from '@/mixins/loader'
 
 export default {
     name: 'CommonUser',
     components: {
         UserInfoDialog
     },
+    mixins: [loader],
     data() {
         return {
             queryInfo: {
                 name: '',
-                date: ''
+                date: '',
+                is_vip: 2,
+                page: 1,
+                pageSize: 10
             },
-            page: 1,
-            pageSize: 10,
-            tableData: [{
-                id: 3,
-                name: '小红',
-                date: '2018-07-03 23:23:23',
-                sexual: '1',
-                even_amount: '600.00',
-                tell: '13212343212',
-                consume_total: '3000.00',
-                consume_times: '5',
-                last_consume: '2018-09-23 18:23:21',
-                no_pay: '0',
-                points: '0',
-                desc: '这是备注'
-            }],
-            detailDialogConf: {
-                visible: false,
-                canEditor: true,
-                userId: null
-            }
+            total: 0,
+            tableData: []
         }
     },
     computed: {
-        ...mapGetters(['globalSize']),
-        isShowPagination() {
-            return this.total > this.pageSize
-        }
+        ...mapGetters(['globalSize'])
+    },
+    mounted() {
+        this.fetchData()
     },
     methods: {
         queryData() {
-
+            this.fetchData()
         },
         fetchData() {
-
+            this.get('getUserList', this.queryInfo).then(res => {
+                if (!res.code) {
+                    this.tableData = res.data
+                    this.total = res.total
+                }
+            })
         },
         pageChangeEvent() {
 
         },
-        addUser() {
-            this.detailDialogConf = { ...this.detailDialogConf, userId: null, canEditor: true, visible: true }
+        addUser(id) {
+            this.$refs.userInfo.open(null, 'add')
         },
-        editUserInfo(id) {
-            this.detailDialogConf = { ...this.detailDialogConf, userId: id, canEditor: true, visible: true }
-        },
-        showUserInfo(id) {
-            this.detailDialogConf = { ...this.detailDialogConf, userId: id, canEditor: false, visible: true }
+        showUserInfo(id, type) {
+            this.$refs.userInfo.open(id, type)
         },
         deleteUser(row) {
-            // TODO: 删除客户
             MessageBox.confirm(`确认删除${row.name}客户`, '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning',
                 center: true
             }).then(() => {
-                console.log(row.id, '删除客户id')
-                MessageBox({
-                    type: 'success',
-                    message: '删除成功'
+                this.post('deleteUser', { id: row.id }).then(res => {
+                    if (!res.code) {
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功'
+                        })
+                        this.fetchData()
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: res.msg
+                        })
+                    }
                 })
             }).catch(() => {
             })
         },
         closeUserInfoDialog(update) {
-            this.detailDialogConf.visible = false
             update && this.fetchData()
         }
     }

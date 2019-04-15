@@ -45,7 +45,6 @@
                     layout="prev, pager, next"
                     :total="total"
                     :page-size="pageSize"
-                    :pager-count="7"
                     :current-page="page"
                     @current-change="pageChangeEvent">
                 </el-pagination>

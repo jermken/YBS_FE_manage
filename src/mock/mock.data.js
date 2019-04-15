@@ -94,3 +94,59 @@ export const SETMEAL_LIST = [{
     sub_project: '美甲，洗脸,化妆',
     sub_times: '1,1,1'
 }]
+
+export const users = [{
+    name: 'name1',
+    id: 1,
+    role: 'vip',
+    balance: 10,
+    sendMoney: 10,
+    grender: 1,
+    tell: 'xx',
+    cardList: [1]
+}]
+
+export const cardList = [{
+    id: 1,
+    name: 'c1',
+    project: [{
+        name: 'p1',
+        times: 5
+    }],
+    userList: [1, 2, 3]
+}]
+
+export const setmeal = [{
+    id: 1,
+    name: '名称',
+    project: [{
+        name: 'p1',
+        times: 5,
+        consume_times: 3
+    }]
+}]
+
+export const setmealConsumeList = [{
+    id: 1,
+    user_id: 1,
+    setmeal_id: 1,
+    project:[{
+        name: 'p1',
+        times: 5,
+        consume_times: 3
+    }]
+}]
+
+export const billList = [{
+    id: 1,
+    name: 'username',
+    date: '2019-09-09',
+    total: '应收金额',
+    pay_amount: '实收金额',
+    no_pay: '未付金额',
+    pay_type: '付款方式',
+    card_minu: '扣卡金额',
+    remark: '备注',
+    status: '结清',
+    project: '[{name: "产品",params: "price:12"},{name: "小气泡",params: "{price:0}"}]'
+}]

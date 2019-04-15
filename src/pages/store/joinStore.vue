@@ -21,17 +21,12 @@
         <div class="page-content-wrapper">
             <el-table border :size="globalSize" :data="tableData" style="width: 100%;">
                 <el-table-column prop="create_time" label="创建时间" width="220"></el-table-column>
+                <el-table-column prop="actioner" label="操作人" width="150"></el-table-column>
                 <el-table-column prop="update_time" label="修改时间" width="220"></el-table-column>
+                <el-table-column prop="auditor_name" label="审核人" width="150"></el-table-column>
                 <el-table-column prop="auditor_time" label="审核时间" width="220">
                     <template slot-scope="scope">
                         <span>{{scope.row.auditor_time || '-'}}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="actioner" label="入库人" width="150"></el-table-column>
-                <el-table-column prop="auditor" label="审核人" width="150"></el-table-column>
-                <el-table-column prop="status" label="状态" width="150">
-                    <template slot-scope="scope">
-                        <el-tag :type="statusType[scope.row.status]['type']" :size="globalSize">{{statusType[scope.row.status]['title']}}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column prop="desc" label="备注" width="200">
@@ -39,9 +34,15 @@
                         <span :title="scope.row.desc">{{scope.row.desc}}</span>
                     </template>
                 </el-table-column>
+                <el-table-column prop="status" label="状态" width="150">
+                    <template slot-scope="scope">
+                        <el-tag :type="statusType[scope.row.status]['type']" :size="globalSize">{{statusType[scope.row.status]['title']}}</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="action" label="操作">
                     <template slot-scope="scope">
-                        <el-button type="text" :size="globalSize" @click="showBillDetail">入库单详情</el-button>
+                        <el-button type="text" :size="globalSize" @click="showBillDetail(scope.row.id)">入库单详情</el-button>
+                        <el-button v-if="scope.row.status == 1" type="text" :size="globalSize" @click="showAuditorDialog(scope.row)">审批</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -49,26 +50,30 @@
                 <el-pagination
                     background
                     layout="prev, pager, next"
-                    :total="tableData.length"
+                    :total="total"
                     :page-size="pageSize"
-                    :pager-count="7"
                     :current-page="page"
                     @current-change="pageChangeEvent">
                 </el-pagination>
             </div>
         </div>
-        <store-detail-dialog :show.sync="detailDialogVisible" :detailId="billDetailId" title="入库" @closed="closeBillDetail"></store-detail-dialog>
+        <auditor-dialog ref="auditor" title="入库单审批" type="joinstore" @afterClose="queryData"></auditor-dialog>
+        <store-detail-dialog ref="storeDetail" title="入库" @closed="closeBillDetail"></store-detail-dialog>
     </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
 import StoreDetailDialog from '@/widget/storeDetail.vue'
+import auditorDialog from '@/widget/auditor.vue'
+import loader from '@/mixins/loader'
 
 export default {
     name: 'JoinStore',
     components: {
-        StoreDetailDialog
+        StoreDetailDialog,
+        auditorDialog
     },
+    mixins: [loader],
     data() {
         return {
             statusArr: [{
@@ -91,35 +96,12 @@ export default {
             },
             page: 1,
             pageSize: 10,
-            tableData: [{
-                action_date: '2018-09-01',
-                auditor_time: '2018-09-11',
-                actioner: '小琴',
-                auditor: 'jermken',
-                status: '1',
-                desc: '第一次入库'
-            },{
-                action_date: '2018-09-02',
-                auditor_time: '2018-09-12',
-                actioner: '小婷',
-                auditor: 'jermken',
-                status: '2',
-                desc: '第二次入库'
-            },{
-                action_date: '2018-09-03',
-                auditor_time: '2018-09-13',
-                actioner: '小婕',
-                auditor: 'jermken',
-                status: '3',
-                desc: '第三次入库'
-            }],
+            tableData: [],
             total: 0,
             queryInfo: {
                 date: '',
                 status: '0'
-            },
-            detailDialogVisible: false,
-            billDetailId: ''
+            }
         }
     },
     computed: {
@@ -145,8 +127,12 @@ export default {
                 page: 1,
                 pageSize: this.pageSize
             }
-            console.log(obj)
-            // TODO: 拉取入库单列表
+            this.get('getStore', obj).then(res => {
+                if (!res.code) {
+                    this.tableData = res.data
+                    this.total = res.total
+                }
+            })
         },
         pageChangeEvent(val) {
             this.page = val
@@ -158,13 +144,15 @@ export default {
             this.fetchData(params)
         },
         addStoreBill() {
-            this.detailDialogVisible = true
+            this.$refs.storeDetail.open()
         },
-        showBillDetail() {
-            this.detailDialogVisible = true
+        showBillDetail(id) {
+            this.$refs.storeDetail.open(id)
+        },
+        showAuditorDialog(row) {
+            this.$refs.auditor.open(row.id, row.list)
         },
         closeBillDetail(update) {
-            this.detailDialogVisible = false
             update && this.fetchData()
         }
     },

@@ -9,6 +9,9 @@
         <el-form-item v-if="cardInfo.name" label="卡类价格" label-width="80px" prop="price">
             <el-input disabled width="60%" v-model="cardInfo.price"></el-input>
         </el-form-item>
+        <el-form-item v-if="cardInfo.name" label="赠送金额" label-width="80px" prop="price">
+            <el-input disabled width="60%" v-model="cardInfo.price"></el-input>
+        </el-form-item>
         <el-form-item label="实收金额" label-width="80px" prop="payment">
             <el-input v-model="cardInfo.payment" placeholder="请输入需支付金额"></el-input>
         </el-form-item>
