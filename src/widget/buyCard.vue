@@ -6,10 +6,10 @@
                 <el-option v-for="item in cardList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
         </el-form-item>
-        <el-form-item v-if="cardInfo.name" label="卡类价格" label-width="80px" prop="price">
+        <el-form-item v-if="cardInfo.price" label="卡类价格" label-width="80px" prop="price">
             <el-input disabled width="60%" v-model="cardInfo.price"></el-input>
         </el-form-item>
-        <el-form-item v-if="cardInfo.name" label="赠送金额" label-width="80px" prop="price">
+        <el-form-item v-if="cardInfo.present_price" label="赠送金额" label-width="80px" prop="price">
             <el-input disabled width="60%" v-model="cardInfo.price"></el-input>
         </el-form-item>
         <el-form-item label="实收金额" label-width="80px" prop="payment">

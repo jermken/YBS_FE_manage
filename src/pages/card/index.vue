@@ -7,6 +7,7 @@
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" icon="el-icon-search" @click="queryData">搜索</el-button>
+                    <el-button class="clear-query-btn" @click="clearQuery">清除</el-button>
                 </el-form-item>
                 <el-form-item style="float:right;">
                     <el-button @click="addCard" plain>新增</el-button>
@@ -16,34 +17,36 @@
         <div class="page-content-wrapper">
             <ul class="card-list">
                 <li class="card-item" v-for="(item, index) in cardList" :key="index" @click="showCardInfoDialog(item.id)">
-                    <img class="card-item__pic" :src="item.imgUrl"/>
+                    <img class="card-item__pic" src='../../img/mianmo.png'/>
                     <div class="card-item__title">{{item.name}}</div>
                     <div class="card-item__desc">充值满&nbsp;&nbsp;&nbsp;
-                        <span class="card-item__price">{{item.total}}</span>
+                        <span class="card-item__price">{{item.price}}</span>
                         &nbsp;&nbsp;&nbsp;即送
+                        <span class="card-item__price">{{item.present_price}}</span>
                         <el-button :size="globalSize" class="card-user-btn" type="text" @click="(e) => showCardUser(e, item.id)">持卡客户&nbsp;> </el-button>
                     </div>
                     <el-button class="card-delete-btn" @click="(e) => deleteCard(e, item.id)" plain type="primary" :size="globalSize">删除</el-button>
                 </li>
             </ul>
         </div>
-        <div class="pagination-wrapper" v-if="isShowPagination">
+        <div class="pagination-wrapper" v-if="total">
             <el-pagination
                 background
                 layout="prev, pager, next"
-                :total="cardList.length"
-                :page-size="pageSize"
-                :current-page="page"
+                :total="total"
+                :page-size="queryInfo.pageSize"
+                :current-page="queryInfo.page"
                 @current-change="pageChangeEvent">
             </el-pagination>
         </div>
-        <card-info-dialog :show.sync="cardInfoDialogVisible" :cardId="cardId" @closed="closeCardInfoDialog"/>
-        <card-user-dialog :show.sync="cardUserDialogVisible" :cardId="cardId" @closed="closeCardUserDialog"/>
+        <card-info-dialog ref="cardInfoDialog" @closed="closeCardInfoDialog"/>
+        <!-- <card-user-dialog :show.sync="cardUserDialogVisible" :cardId="cardId" @closed="closeCardUserDialog"/> -->
     </div>
 </template>
 <script>
 import { MessageBox } from 'element-ui'
 import { mapGetters } from 'vuex'
+import loader from '@/mixins/loader'
 import cardInfoDialog from '@/widget/cardInfo'
 import cardUserDialog from '@/widget/cardUserList'
 
@@ -53,33 +56,16 @@ export default {
         cardInfoDialog,
         cardUserDialog
     },
+    mixins: [loader],
     data() {
         return {
             queryInfo: {
-                name: ''
+                name: '',
+                page: 1,
+                pageSize: 10
             },
-            page: 1,
-            pageSize: 8,
-            cardList: [{
-                id: 1,
-                name: '贵宾卡',
-                imgUrl: require('@/img/mianmo.png'),
-                total: 500
-            },{
-                id: 2,
-                name: '仙女卡',
-                imgUrl: require('@/img/mianmo.png'),
-                total: 1000
-            },{
-                id: 3,
-                name: '女神卡',
-                imgUrl: require('@/img/mianmo.png'),
-                total: 2000
-            }],
-            total: 0,
-            cardInfoDialogVisible: false,
-            cardId: null,
-            cardUserDialogVisible: false
+            cardList: [],
+            total: 0
         }
     },
     computed: {
@@ -91,19 +77,35 @@ export default {
     methods: {
         async fetchData(obj) {
             let params = obj || {}
-            console.log(params, 8888888)
-            // TODO: 拉取产品列表
+            this.get('getCardList',params).then(res => {
+                if (!res.code) {
+                    this.cardList = res.data
+                    this.total = res.total
+                } else {
+                    this.$message({
+                        type: 'error',
+                        message: res.msg
+                    })
+                }
+            }).catch(err => {
+                this.$message({
+                    type: 'error',
+                    message: err
+                })
+            })
         },
         queryData() {
             this.page = 1
-            this.fetchData({ ...this.queryInfo, page: 1, pageSize: this.pageSize})
+            this.fetchData(this.queryInfo)
+        },
+        clearQuery() {
+            this.queryInfo.name = ''
+            this.queryData()
         },
         addCard() {
-            this.cardId = null
-            this.cardInfoDialogVisible = true
+            this.$refs.cardInfoDialog.open()
         },
         deleteCard(e, id) {
-            console.log(id)
             e.stopPropagation()
             MessageBox.confirm('确认删除该卡类', '提示', {
                 confirmButtonText: '确定',
@@ -111,33 +113,42 @@ export default {
                 type: 'warning',
                 center: true
             }).then(() => {
-                // TODO: 删除产品接口
-                MessageBox({
-                    type: 'success',
-                    message: '删除成功'
+                this.post('deleteCard', { id }).then(res => {
+                    if (!res.code) {
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功'
+                        })
+                        this.queryData()
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: res.msg
+                        })
+                    }
                 })
-            }).catch(() => {
+            }).catch(err => {
+                this.$message({
+                    type: 'error',
+                    message: err
+                })
             })
         },
         showCardUser(e, id) {
             e.stopPropagation()
-            this.cardId = id
-            this.cardUserDialogVisible = true
+            this.$refs.cardInfoDialog.open(id)
         },
         pageChangeEvent(val) {
-            this.page = val
-            this.fetchData({...this.queryInfo, page: val, pageSize: this.pageSize})
+            this.queryInfo.page = val
+            this.fetchData(this.queryInfo)
         },
         showCardInfoDialog(id) {
-            this.cardId = id
-            this.cardInfoDialogVisible = true
+            this.$refs.cardInfoDialog.open(id)
         },
         closeCardInfoDialog(isUpdate) {
-            this.cardInfoDialogVisible = false
             isUpdate && this.fetchData()
         },
         closeCardUserDialog(isUpdate) {
-            this.cardUserDialogVisible = false
             isUpdate && this.fetchData()
         }
     },
@@ -149,6 +160,9 @@ export default {
 <style lang="scss">
 @import '@/scss/mixin.scss';
 .card-page {
+    .clear-query-btn {
+        margin-left: 20px;
+    }
     .card-list {
         @include clearfix;
         margin-left: -20px;

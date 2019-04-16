@@ -119,6 +119,8 @@ export const cardList = [{
 export const setmeal = [{
     id: 1,
     name: '名称',
+    create_time: '',
+    update_time: '',
     project: [{
         name: 'p1',
         times: 5,
@@ -129,7 +131,9 @@ export const setmeal = [{
 export const setmealConsumeList = [{
     id: 1,
     user_id: 1,
+    user_name: '',
     setmeal_id: 1,
+    setmeal_name: '',
     project:[{
         name: 'p1',
         times: 5,
