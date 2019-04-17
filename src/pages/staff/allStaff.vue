@@ -40,22 +40,22 @@
                 </el-table-column>
                 <el-table-column prop="action" label="操作">
                     <template slot-scope="scope">
-                        <el-button type="text" @click="editorStaff(scope.row)" :size="globalSize">编辑</el-button>
+                        <el-button type="text" @click="editorStaff(scope.row.id)" :size="globalSize">编辑</el-button>
                         <el-button type="text" :size="globalSize" @click="deleteStaff(scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
-            <div class="pagination-wrapper">
+            <div class="pagination-wrapper" v-if="total">
                 <el-pagination
                     background
                     layout="prev, pager, next"
                     :total="total"
-                    :page-size="pageSize"
-                    :current-page="page"
+                    :page-size="queryInfo.pageSize"
+                    :current-page="queryInfo.page"
                     @current-change="pageChangeEvent">
                 </el-pagination>
             </div>
-            <staff-info-dialog :staffId.sync="staffId" :show.sync="staffInfoDialogVisible" @closed="closeStaffInfoDialog"></staff-info-dialog>
+            <staff-info-dialog ref="staffInfo" @closed="closeStaffInfoDialog"></staff-info-dialog>
         </div>
     </div>
 </template>
@@ -73,7 +73,6 @@ export default {
     },
     data() {
         return {
-            staffId: null,
             role: {
                 staff: '员工',
                 manager: '店长',
@@ -81,14 +80,13 @@ export default {
             },
             tableData: [],
             total: 0,
-            pageSize: 8,
-            page: 1,
             queryInfo: {
                 name: '',
                 id: '',
-                status: ''
-            },
-            staffInfoDialogVisible: false
+                status: '',
+                pageSize: 8,
+                page: 1
+            }
         }
     },
     computed: {
@@ -96,51 +94,25 @@ export default {
     },
     methods: {
         queryData() {
-            let params = {
-                ...this.queryInfo,
-                page: 1,
-                pageSize: this.pageSize
-            }
-            this.fetchData(params).then(()=> {
-                this.page = 1
-            })
+            this.queryInfo.page = 1
+            this.fetchData()
         },
         clearQuery() {
             this.queryInfo = {
                 name: '',
                 id: '',
-                status: ''
-            }
-            let params = {
-                ...this.queryInfo,
+                status: '',
                 page: 1,
-                pageSize: this.pageSize
+                pageSize: 8
             }
-            this.fetchData(params).then(()=> {
-                this.page = 1
-            })
+            this.fetchData()
         },
         pageChangeEvent(page) {
-            let params = {
-                page,
-                pageSize: this.pageSize,
-                name: '',
-                id: '',
-                status: ''
-            }
-            this.fetchData(params)
+            this.queryInfo.page = page
+            this.fetchData()
         },
         async fetchData(obj) {
-            let params = obj || {
-                ...this.queryInfo,
-                page: 1,
-                pageSize: this.pageSize
-            }
-            console.log(params, 'fetch stafflist params')
-            this.get('getStaffList',{
-                ...params
-            }).then((res) => {
-                console.log(res, 'stafflist info')
+            this.get('getStaffList', this.queryInfo).then((res) => {
                 if(!res.code) {
                     this.tableData = res.data
                     this.total = res.total
@@ -153,12 +125,10 @@ export default {
             })
         },
         addStaff() {
-            this.staffInfoDialogVisible = true
-            this.staffId = null
+            this.$refs.staffInfo.open()
         },
-        editorStaff(row) {
-            this.staffInfoDialogVisible = true
-            this.staffId = row.id
+        editorStaff(id) {
+            this.$refs.staffInfo.open(id)
         },
         deleteStaff(row) {
             MessageBox.confirm('确认删除此员工', '提示', {
@@ -187,8 +157,6 @@ export default {
             })
         },
         closeStaffInfoDialog(isUpdate) {
-            this.staffInfoDialogVisible = false
-            this.staffId = null
             isUpdate && this.fetchData()
         }
     },

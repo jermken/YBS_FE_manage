@@ -29,22 +29,24 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <div class="pagination-wrapper">
+            <div class="pagination-wrapper" v-if="total">
                 <el-pagination
                     background
                     layout="prev, pager, next"
-                    :total="tableData.length"
-                    :page-size="pageSize"
-                    :current-page="page"
+                    :total="total"
+                    :page-size="queryInfo.pageSize"
+                    :current-page="queryInfo.page"
                     @current-change="pageChangeEvent">
                 </el-pagination>
             </div>
         </div>
-        <setmeal-dialog :show.sync="setmealDialogVisible" :setmeal_id="setmealId" @closed="closedSetmealDialog"/>
+        <setmeal-dialog ref="setmealDialog" @closed="closedSetmealDialog"/>
     </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import { MessageBox } from 'element-ui'
+import loader from '@/mixins/loader'
 import { SETMEAL_LIST } from '@/mock/mock.data'
 import setmealDialog from '@/widget/setMealInfo'
 
@@ -53,64 +55,85 @@ export default {
     components: {
         setmealDialog
     },
+    mixins: [loader],
     data() {
         return {
             queryInfo: {
                 name: '',
                 start_time: '',
-                end_time: ''
+                end_time: '',
+                page: 1,
+                pageSize: 8
             },
-            page: 1,
-            pageSize: 8,
             total: 0,
-            tableData: [],
-            setmealDialogVisible: false,
-            setmealId: null
+            tableData: []
         }
     },
     computed: {
-        ...mapGetters(['globalSize']),
-        isShowPagination() {
-            return this.total > this.pageSize
-        }
+        ...mapGetters(['globalSize'])
     },
     methods: {
-        async fetchData(obj) {
-            let params = obj || {
-                name: '',
-                page: 1,
-                pageSize: 8,
-                start_time: '',
-                end_time: ''
-            }
-            // TODO: 拉取套餐列表
-            console.log(params)
-            this.tableData = SETMEAL_LIST
-            this.total = SETMEAL_LIST.length
+        async fetchData() {
+            this.get('getSetMeal', this.queryInfo).then(res => {
+                if (!res.code) {
+                    this.tableData = res.data
+                    this.total = res.total
+                } else {
+                    this.$message({
+                        type: 'error',
+                        message: res.msg
+                    })
+                }
+            }).catch(err => {
+                this.$message({
+                    type: 'error',
+                    message: err
+                })
+            })
         },
         queryData() {
-            this.page = 1
-            let obj = { ...this.queryInfo, page: this.page, pageSize: this.pageSize }
-            this.fetchData(obj)
+            this.queryInfo.page = 1
+            this.fetchData()
         },
         addSetMeal() {
-            this.setmealDialogVisible = true
+            this.$refs.setmealDialog.open()
         },
         editorSetMeal(id) {
-            this.setmealDialogVisible = true
-            this.setmealId = id
+            this.$refs.setmealDialog.open(id)
         },
-        deleteSetMeal() {
-
+        deleteSetMeal(id) {
+            MessageBox.confirm('确认删除该套餐', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning',
+                center: true
+            }).then(() => {
+                this.post('deleteSetMeal', { id }).then(res => {
+                    if (!res.code) {
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功'
+                        })
+                        this.queryData()
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: res.msg
+                        })
+                    }
+                })
+            }).catch(err => {
+                this.$message({
+                    type: 'error',
+                    message: err
+                })
+            })
         },
         pageChangeEvent(val) {
-            this.page = val
-            let obj = { ...this.queryInfo, page: this.page, pageSize: this.pageSize }
-            this.fetchData(obj)
+            this.queryInfo.page = val
+            this.fetchData()
         },
         closedSetmealDialog(update) {
-            this.setmealDialogVisible = false
-            this.setmealId = null
             update && this.fetchData()
         }
     },

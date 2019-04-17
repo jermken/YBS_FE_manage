@@ -1,5 +1,5 @@
 <template>
-<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="产品信息" width="500px" :before-close="beforeClose" @close="resetFields('goodsInfoForm')">
+<el-dialog :close-on-click-modal="false" :visible.sync="show" title="产品信息" width="500px" :before-close="beforeClose" @close="resetFields('goodsInfoForm')">
     <el-form :model="goodsInfo" status-icon :rules="formRules" ref="goodsInfoForm" :size="globalSize">
         <el-form-item required label="产品名称" label-width="80px" prop="name">
             <el-input placeholder="请输入产品" width="60%" v-model="goodsInfo.name"></el-input>
@@ -43,7 +43,7 @@
     </el-form>
     <span slot="footer">
         <el-button @click="cancelEvent" :size="globalSize">取消</el-button>
-        <el-button @click="confirmEvent('goodsInfoForm')" :size="globalSize" type="primary">提交</el-button>
+        <el-button @click="confirmEvent('goodsInfoForm')" :size="globalSize" type="primary" :loading="loading">提交</el-button>
     </span>
 </el-dialog>
 </template>
@@ -57,10 +57,6 @@ export default {
     // 商品详情组件
     name: 'GoodsInfo',
     mixins: [loader],
-    props: {
-        goodsId: null,
-        show: false
-    },
     data() {
         let validPrice = (rule, value, cb) => {
             if (utils.isValidatePrice(value)) {
@@ -77,6 +73,8 @@ export default {
             }
         }
         return {
+            show: false,
+            loading: false,
             imageUrl: '',
             file: null,
             imgVisible: false,
@@ -117,16 +115,8 @@ export default {
             }
         }
     },
-    watch: {
-        'goodsId': function(val) {
-            val && this.fetchGoodsInfo(val)
-        }
-    },
     computed: {
-        ...mapGetters(['globalSize']),
-        dialogShow: function() {
-            return this.show
-        }
+        ...mapGetters(['globalSize'])
     },
     methods: {
         async fetchGoodsInfo(id) {
@@ -174,13 +164,23 @@ export default {
                 })
             })
         },
+        open(id) {
+            if (id) {
+                this.fetchGoodsInfo(id)
+            }
+            this.show = true
+        },
+        close() {
+            this.show = false
+        },
         cancelEvent() {
-            this.$emit('closed')
+            this.close()
         },
         confirmEvent(ref) {
             this.$refs[ref].validate((valid) => {
                 if (valid) {
                     let that = this
+                    this.loading = true
                     this.uploader(this.file.raw, this.file.name, {}, {}).then(obser => {
                         obser.subscribe({
                             error(err) {
@@ -199,12 +199,14 @@ export default {
                                                 message: res.msg
                                             })
                                             that.$emit('closed', true)
+                                            that.close()
                                         } else {
                                             that.$msgbox({
                                                 type: 'error',
                                                 message: res.msg
                                             })
                                         }
+                                        that.loading = false
                                     })
                                 } else {
                                     that.post('addGoods', {
@@ -217,12 +219,14 @@ export default {
                                                 message: res.msg
                                             })
                                             that.$emit('closed', true)
+                                            that.close()
                                         } else {
                                             that.$msgbox({
                                                 type: 'error',
                                                 message: res.msg
                                             })
                                         }
+                                        that.loading = false
                                     })
                                 }
                             }
@@ -234,7 +238,7 @@ export default {
             })
         },
         beforeClose() {
-            this.$emit('closed')
+            this.close()
         },
         resetFields(ref) {
             this.$refs[ref].resetFields()

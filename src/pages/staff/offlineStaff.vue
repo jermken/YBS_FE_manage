@@ -39,17 +39,17 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <div class="pagination-wrapper">
+            <div class="pagination-wrapper" v-if="total">
                 <el-pagination
                     background
                     layout="prev, pager, next"
                     :total="total"
-                    :page-size="pageSize"
-                    :current-page="page"
+                    :page-size="queryInfo.pageSize"
+                    :current-page="queryInfo.page"
                     @current-change="pageChangeEvent">
                 </el-pagination>
             </div>
-            <staff-info-dialog :staffId.sync="staffId" :show.sync="staffInfoDialogVisible" @closed="closeStaffInfoDialog"></staff-info-dialog>
+            <staff-info-dialog ref="staffInfo" @closed="closeStaffInfoDialog"></staff-info-dialog>
         </div>
     </div>
 </template>
@@ -67,7 +67,6 @@ export default {
     },
     data() {
         return {
-            staffId: null,
             role: {
                 staff: '员工',
                 manager: '店长',
@@ -75,14 +74,13 @@ export default {
             },
             tableData: [],
             total: 0,
-            pageSize: 8,
-            page: 1,
             queryInfo: {
                 name: '',
                 id: '',
-                status: 0
-            },
-            staffInfoDialogVisible: false
+                status: 0,
+                pageSize: 8,
+                page: 1
+            }
         }
     },
     computed: {
@@ -90,50 +88,26 @@ export default {
     },
     methods: {
         queryData() {
-            let params = {
-                ...this.queryInfo,
-                page: 1,
-                pageSize: this.pageSize
-            }
-            this.fetchData(params).then(()=> {
-                this.page = 1
-            })
+            this.queryInfo.page = 1
+            this.fetchData()
         },
         clearQuery() {
             this.queryInfo = {
                 name: '',
                 id: '',
-                status: 0
-            }
-            let params = {
-                ...this.queryInfo,
+                status: 0,
                 page: 1,
-                pageSize: this.pageSize
+                pageSize: 8
             }
-            this.fetchData(params).then(()=> {
-                this.page = 1
-            })
+            this.fetchData()
         },
         pageChangeEvent(page) {
-            let params = {
-                page,
-                pageSize: this.pageSize,
-                name: '',
-                id: '',
-                status: 0
-            }
-            this.fetchData(params)
+            this.queryInfo.page = page
+            this.fetchData()
         },
-        async fetchData(obj) {
-            let params = obj || {
-                ...this.queryInfo,
-                page: 1,
-                pageSize: this.pageSize
-            }
+        async fetchData() {
             console.log(params, 'fetch stafflist params')
-            this.get('getStaffList',{
-                ...params
-            }).then((res) => {
+            this.get('getStaffList', this.queryInfo).then((res) => {
                 console.log(res, 'stafflist info')
                 if(!res.code) {
                     this.tableData = res.data
@@ -147,8 +121,7 @@ export default {
             })
         },
         addStaff() {
-            this.staffInfoDialogVisible = true
-            this.staffId = null
+            this.$refs.staffInfo.open()
         },
         deleteStaff(row) {
             MessageBox.confirm('确认删除此员工', '提示', {
@@ -176,8 +149,6 @@ export default {
             })
         },
         closeStaffInfoDialog(isUpdate) {
-            this.staffInfoDialogVisible = false
-            this.staffId = null
             isUpdate && this.fetchData()
         }
     },

@@ -36,17 +36,17 @@
                 </li>
             </ul>
         </div>
-        <div class="pagination-wrapper" v-if="goodsList.length">
+        <div class="pagination-wrapper" v-if="total">
             <el-pagination
                 background
                 layout="prev, pager, next"
                 :total="total"
-                :page-size="pageSize"
-                :current-page="page"
+                :page-size="queryInfo.pageSize"
+                :current-page="queryInfo.page"
                 @current-change="pageChangeEvent">
             </el-pagination>
         </div>
-        <goods-info-dialog :goodsId.sync="goodsId" :show.sync="goodsInfoDialogVisible" @closed="closeGoodsInfoDialog"></goods-info-dialog>
+        <goods-info-dialog ref="goodsInfo" @closed="closeGoodsInfoDialog"></goods-info-dialog>
     </div>
 </template>
 <script>
@@ -66,13 +66,11 @@ export default {
             queryInfo: {
                 name: '',
                 code: '',
-                status: 1
+                status: 1,
+                page: 1,
+                pageSize: 8
             },
-            page: 1,
-            pageSize: 8,
             total: 0,
-            goodsId: null,
-            goodsInfoDialogVisible: false,
             goodsList: []
         }
     },
@@ -80,11 +78,9 @@ export default {
         ...mapGetters(['globalSize'])
     },
     methods: {
-        async fetchData(obj) {
+        async fetchData() {
             let params = obj || {}
-            this.get('getGoodsList', {
-                ...params
-            }).then((res) => {
+            this.get('getGoodsList', this.queryInfo).then((res) => {
                 if (!res.code) {
                     this.goodsList = res.data
                     this.total = res.total
@@ -92,11 +88,11 @@ export default {
             })
         },
         queryData() {
-            this.page = 1
-            this.fetchData({ ...this.queryInfo, page: 1, pageSize: this.pageSize})
+            this.queryInfo.page = 1
+            this.fetchData()
         },
         addGoods() {
-            this.goodsInfoDialogVisible = true
+            this.$refs.goodsInfo.open()
         },
         deleteGoods(e, id) {
             e.stopPropagation()
@@ -124,15 +120,13 @@ export default {
             })
         },
         pageChangeEvent(val) {
-            this.page = val
-            this.fetchData({...this.queryInfo, page: val, pageSize: this.pageSize})
+            this.queryInfo.page = val
+            this.fetchData()
         },
         showGoodsInfoDialog(id) {
-            this.goodsId = id
-            this.goodsInfoDialogVisible = true
+            this.$refs.goodsInfo.open(id)
         },
         closeGoodsInfoDialog(isUpdate) {
-            this.goodsInfoDialogVisible = false
             isUpdate && this.fetchData()
         }
     },

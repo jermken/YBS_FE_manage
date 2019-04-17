@@ -1,5 +1,5 @@
 <template>
-<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="员工信息" width="500px" :before-close="beforeClose" @close="resetFields('staffInfoForm')">
+<el-dialog :close-on-click-modal="false" :visible.sync="show" title="员工信息" width="500px" :before-close="beforeClose" @close="resetFields('staffInfoForm')">
     <el-form :model="staffInfo" status-icon :rules="formRules" ref="staffInfoForm" :size="globalSize">
         <el-form-item required label="姓名" label-width="80px" prop="name">
             <el-input :disabled="staffId? true : false" placeholder="请输入姓名" width="60%" v-model="staffInfo.name"></el-input>
@@ -44,10 +44,6 @@ export default {
     // 员工信息详情组件
     name: 'StaffInfo',
     mixins: [loader],
-    props: {
-        staffId: null,
-        show: false
-    },
     data() {
         let validTell = (rule, value, cb) => {
             if (utils.isValidateTell(value)) {
@@ -57,6 +53,8 @@ export default {
             }
         }
         return {
+            show: false,
+            loading: false,
             roleArr: [{
                 label: '员工',
                 value: 'staff'
@@ -108,25 +106,15 @@ export default {
             }
         }
     },
-    watch: {
-        'staffId': function(val) {
-            val && this.fetchStaffInfo(val)
-        }
-    },
     computed: {
-        ...mapGetters(['globalSize']),
-        dialogShow: function() {
-            return this.show
-        }
+        ...mapGetters(['globalSize'])
     },
     methods: {
         async fetchStaffInfo(id) {
-            console.log(id, 'staff detail id')
             this.get('getStaffDetail', {
                 id
             }).then((res) => {
                 if(!res.code) {
-                    console.log(res, 'staff detail info')
                     this.staffInfo = res.data
                 } else {
                     this.$msgbox({
@@ -136,46 +124,72 @@ export default {
                 }
             })
         },
+        open(id) {
+            if (id) {
+                this.fetchStaffInfo(id)
+            }
+            this.show = true
+        },
+        close() {
+            this.show = false
+        },
         cancelEvent() {
-            this.$emit('closed')
+            this.close()
         },
         confirmEvent(ref) {
             this.$refs[ref].validate((valid) => {
                 if (valid) {
+                    this.loading = true
                     if (this.staffId) {
                         this.post('updateStaff',{
                             id: this.staffId,
                             ...this.staffInfo
                         }).then((res) => {
                             if(!res.code) {
-                                this.$emit('closed', true)
                                 this.$message({
                                     message: res.msg,
                                     type: 'success'
                                 })
+                                this.$emit('closed', true)
+                                this.close()
                             } else {
                                 this.$msgbox({
                                     message: res.msg,
                                     type: 'error'
                                 })
                             }
+                            this.loading = false
+                        }).catch(err => {
+                            this.$message({
+                                message: err,
+                                type: 'error'
+                            })
+                            this.loading = false
                         })
                     } else {
                         this.post('addStaff',{
                             ...this.staffInfo
                         }).then((res) => {
                             if (!res.code) {
-                                this.$emit('closed', true)
                                 this.$message({
                                     message: res.msg,
                                     type: 'success'
                                 })
+                                this.$emit('closed', true)
+                                this.close()
                             } else {
                                 this.$msgbox({
                                     message: res.msg,
                                     type: 'error'
                                 })
                             }
+                            this.loading = false
+                        }).catch(err => {
+                            this.$message({
+                                message: err,
+                                type: 'error'
+                            })
+                            this.loading = false
                         })
                     }
                 } else {
@@ -184,7 +198,7 @@ export default {
             })
         },
         beforeClose() {
-            this.$emit('closed')
+            this.close()
         },
         resetFields(ref) {
             this.$refs[ref].resetFields()

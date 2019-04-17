@@ -46,13 +46,13 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <div class="pagination-wrapper" v-if="isShowPagination">
+            <div class="pagination-wrapper" v-if="total">
                 <el-pagination
                     background
                     layout="prev, pager, next"
                     :total="total"
-                    :page-size="pageSize"
-                    :current-page="page"
+                    :page-size="queryInfo.pageSize"
+                    :current-page="queryInfo.page"
                     @current-change="pageChangeEvent">
                 </el-pagination>
             </div>
@@ -94,40 +94,26 @@ export default {
                 '2': {type: 'success', title: '已通过'},
                 '3': {type: 'danger', title: '不通过'}
             },
-            page: 1,
-            pageSize: 10,
             tableData: [],
             total: 0,
             queryInfo: {
                 date: '',
-                status: '0'
+                status: '0',
+                page: 1,
+                pageSize: 10
             }
         }
     },
     computed: {
-        ...mapGetters(['globalSize']),
-        isShowPagination() {
-            return this.total > this.pageSize
-        }
+        ...mapGetters(['globalSize'])
     },
     methods: {
         queryData() {
-            this.page = 1
-            let params = {
-                ...this.queryInfo,
-                page: 1,
-                pageSize: this.pageSize
-            }
-            this.fetchData(params)
+            this.queryInfo.page = 1
+            this.fetchData()
         },
-        async fetchData(params) {
-            let obj = params || {
-                date: '',
-                status: '0',
-                page: 1,
-                pageSize: this.pageSize
-            }
-            this.get('getStore', obj).then(res => {
+        async fetchData() {
+            this.get('getStore', this.queryInfo).then(res => {
                 if (!res.code) {
                     this.tableData = res.data
                     this.total = res.total
@@ -135,13 +121,8 @@ export default {
             })
         },
         pageChangeEvent(val) {
-            this.page = val
-            let params = {
-                ...this.queryInfo,
-                page: val,
-                pageSize: this.pageSize
-            }
-            this.fetchData(params)
+            this.queryInfo.page = val
+            this.fetchData()
         },
         addStoreBill() {
             this.$refs.storeDetail.open()

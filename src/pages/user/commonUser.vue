@@ -107,7 +107,7 @@ export default {
         pageChangeEvent() {
 
         },
-        addUser(id) {
+        addUser() {
             this.$refs.userInfo.open(null, 'add')
         },
         showUserInfo(id, type) {
