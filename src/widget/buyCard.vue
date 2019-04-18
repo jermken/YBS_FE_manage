@@ -1,24 +1,47 @@
 <template>
-<el-dialog :close-on-click-modal="false" :visible.sync="dialogShow" title="卡类信息" width="500px" :before-close="beforeClose" @close="resetFields('buyCardForm')">
-    <el-form :model="cardInfo" status-icon :rules="formRules" ref="buyCardForm" :size="globalSize">
-        <el-form-item required label="卡类名称" label-width="80px" prop="name">
-            <el-select v-model="cardInfo.name" :size="globalSize" filterable placeholder="请输入卡类名称" @change="selectCard">
+<el-dialog :close-on-click-modal="false" :visible.sync="show" title="卡类信息" width="500px" :before-close="beforeClose" @close="resetFields('buyCardForm')">
+    <el-form :model="cardInfo" status-icon :rules="formRules" ref="buyCardForm" :size="globalSize" label-width="80px">
+        <el-form-item label="客户类别">
+            <el-radio-group v-model="billInfo.userType" @change="onUserTypeChange">
+                <el-radio label="1">新客户</el-radio>
+                <el-radio label="2">老客户</el-radio>
+            </el-radio-group>
+        </el-form-item>
+        <el-form-item label="客户姓名" prop="userName">
+            <el-input disabled width="60%" v-if="billInfo.userType == 1" v-model="billInfo.userName"></el-input>
+            <el-select v-model="billInfo.userName" v-else :size="globalSize" filterable placeholder="请输入客户名">
+                <el-option v-for="item in userList" :key="item.id" :label="item.name" :value="item.name"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item required label="卡类名称" prop="name">
+            <el-select v-model="billInfo.cardName" :size="globalSize" filterable placeholder="请输入卡类名称" @change="selectCard">
                 <el-option v-for="item in cardList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
         </el-form-item>
-        <el-form-item v-if="cardInfo.price" label="卡类价格" label-width="80px" prop="price">
-            <el-input disabled width="60%" v-model="cardInfo.price"></el-input>
+        <el-form-item label="卡类价格" prop="price">
+            <el-input disabled width="60%" v-model="billInfo.price"></el-input>
         </el-form-item>
-        <el-form-item v-if="cardInfo.present_price" label="赠送金额" label-width="80px" prop="price">
-            <el-input disabled width="60%" v-model="cardInfo.price"></el-input>
+        <el-form-item label="赠送金额" prop="presentPrice">
+            <el-input disabled width="60%" v-model="billInfo.presentPrice"></el-input>
         </el-form-item>
-        <el-form-item label="实收金额" label-width="80px" prop="payment">
-            <el-input v-model="cardInfo.payment" placeholder="请输入需支付金额"></el-input>
+        <el-form-item required label="会员" label-width="80px" prop="is_vip">
+            <el-radio-group v-model="billInfo.is_vip" disabled>
+                <el-radio :label="1" disabled>是</el-radio>
+                <el-radio :label="2" disabled>否</el-radio>
+            </el-radio-group>
+        </el-form-item>
+        <el-form-item required label="美容师" prop="serverName">
+            <el-select v-model="billInfo.serverName" :size="globalSize" filterable placeholder="请选择美容师" @change="selectCard">
+                <el-option v-for="item in serverList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="实收金额" prop="payment">
+            <el-input v-model="billInfo.payment" placeholder="请输入需支付金额"></el-input>
         </el-form-item>
     </el-form>
     <span slot="footer">
         <el-button @click="cancelEvent" :size="globalSize">取消</el-button>
-        <el-button @click="confirmEvent('buyCardForm')" :size="globalSize" type="primary">结账</el-button>
+        <el-button @click="confirmEvent('buyCardForm')" :size="globalSize" type="primary" :loading="loading">结账</el-button>
     </span>
 </el-dialog>
 </template>
@@ -26,20 +49,24 @@
 import { mapGetters } from 'vuex'
 
 export default {
-    // 开卡组件
     name: 'BuyCard',
-    props: {
-        user_id: null,
-        server_id: null,
-        show: false
-    },
     data() {
         return {
-            cardInfo: {
-                name: '',
+            show: false,
+            loading: false,
+            billInfo: {
+                userType: '1',
+                userName: '',
+                userId: '',
+                cardName: '',
+                cardId: '',
+                cardPrice: '',
                 price: '',
+                cardPrice: '',
+                is_vip:1,
                 payment: ''
             },
+            userList: [],
             formRules:{
                 name: [{
                     required: true,
@@ -52,48 +79,39 @@ export default {
                     trigger: 'blur'
                 }]
             },
-            cardList: [{
-                id: 1,
-                name: '贵宾卡',
-                price: 500
-            },{
-                id: 2,
-                name: '仙女卡',
-                price: 1000
-            },{
-                id: 1,
-                name: '女神卡',
-                price: 200
-            }]
+            cardList: [],
+            serverList: []
         }
-    },
-    watch: {
-        
     },
     computed: {
-        ...mapGetters(['globalSize']),
-        dialogShow: function() {
-            return this.show
-        }
+        ...mapGetters(['globalSize'])
     },
     methods: {
+        open() {
+            this.show = true
+        },
+        close() {
+            this.show = false
+        },
         cancelEvent() {
-            this.$emit('closed')
+            this.close()
         },
         confirmEvent(ref) {
             this.$refs[ref].validate((valid) => {
                 if (valid) {
-                    // TODO: 新增或修改卡类信息
-                    alert('success')
-                    this.$emit('topayment')
-                    // this.$emit('closed', true)
+                    let params = { ...this.billInfo }
+                    this.post('', this.billInfo).then(res => {
+                        if (!res.code) {
+                            
+                        }
+                    })
                 } else {
                     return false
                 }
             })
         },
         beforeClose() {
-            this.$emit('closed')
+            this.close()
         },
         resetFields(ref) {
             this.$refs[ref].resetFields()
@@ -104,7 +122,7 @@ export default {
         }
     },
     mounted() {
-        // TODO: 拉取卡类列表
+
     }
 }
 </script>

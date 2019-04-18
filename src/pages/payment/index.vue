@@ -71,10 +71,9 @@
         <div class="payment-page-bottom">
             <span class="payment-title">消费明细</span>
             <span class="add-project-wrapper">
-                <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addGoods">商品出售</el-button>
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addProject">项目服务</el-button>
+                <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addGoods">商品出售</el-button>
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetMeal" :disabled="userInfo.userType == 1">套餐项目</el-button>
-                <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetProject">自定义项目</el-button>
                 <el-button :size="globalSize" type="primary" round @click="buyCard" :disabled="!(userInfo.userType == 2 && userInfo.name && userInfo.server)">开卡服务</el-button>
                 <el-button :size="globalSize" type="primary" round @click="recharge" :disabled="!(userInfo.userType == 2 && userInfo.name && userInfo.server)">充值服务</el-button>
             </span>
@@ -84,13 +83,10 @@
                         <el-select v-model="scope.row.name" :size="globalSize" filterable v-if="scope.row.type == 'goods'" placeholder="请输入商品名称">
                             <el-option></el-option>
                         </el-select>
-                        <el-select v-model="scope.row.name" :size="globalSize" filterable v-if="scope.row.type == 'project'" placeholder="请输入项目名称">
-                            <el-option></el-option>
-                        </el-select>
+                        <el-input v-model="scope.row.name" :size="globalSize" v-if="scope.row.type == 'project'" placeholder="请输入项目名称"></el-input>
                         <el-select v-model="scope.row.name" :size="globalSize" filterable v-if="scope.row.type == 'set_meal'" placeholder="请输入套餐项目">
                             <el-option></el-option>
                         </el-select>
-                        <el-input v-model="scope.row.name" :size="globalSize" v-if="scope.row.type == 'set_project'" placeholder="请输入自定义项目"></el-input>
                     </template>
                 </el-table-column>
                 <el-table-column prop="price" label="价格" width="150">
@@ -233,14 +229,6 @@ export default {
         addSetMeal() {
             this.consumeData.push({
                 type: 'set_meal',
-                price: '',
-                num: '',
-                server: ''
-            })
-        },
-        addSetProject() {
-            this.consumeData.push({
-                type: 'set_project',
                 price: '',
                 num: '',
                 server: ''
