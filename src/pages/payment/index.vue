@@ -3,33 +3,35 @@
         <div class="payment-page-top">
             <div class="payment-page-top__left">
                 <span class="payment-title">客户信息</span>
-                <el-form :model="userInfo" status-icon :rules="formRules" ref="userInfoForm" :size="globalSize" label-width="80px">
+                <el-form :model="billInfo" status-icon :rules="formRules" ref="userInfoForm" :size="globalSize" label-width="80px">
                     <el-form-item label="客户类别">
-                        <el-radio-group v-model="userInfo.userType" @change="onUserTypeChange">
+                        <el-radio-group v-model="billInfo.user_type" @change="onUserTypeChange">
                             <el-radio label="1">游客</el-radio>
                             <el-radio label="2">客户</el-radio>
                         </el-radio-group>
                     </el-form-item>
-                    <el-form-item label="游客姓名" v-if="userInfo.userType == 1">
-                        <el-input v-model="userInfo.name" placeholder="请输入游客姓名" style="width:60% !important;"></el-input>
+                    <el-form-item label="游客姓名" v-if="billInfo.user_type == '1'">
+                        <el-input v-model="billInfo.user_info.name" placeholder="请输入游客姓名" style="width:60% !important;"></el-input>
                     </el-form-item>
                     <el-form-item label="客户姓名" v-else>
-                        <el-input v-model="userInfo.name" placeholder="请输入客户姓名" style="width:60% !important;"></el-input>
-                        <span v-if="userInfo.info.isVip" class="vip-tips">（会员）</span>
+                        <el-select v-model="billInfo.info" filterable remote :remote-method="fetchUserList" placeholder="请输入客户姓名">
+                            <el-option v-for="item in userList" :key="item.id" :label="itme.name" :value="item"></el-option>
+                        </el-select>
+                        <span v-if="billInfo.user_info.isVip" class="vip-tips">（会员）</span>
                     </el-form-item>
                     <el-form-item label="美容师">
-                        <el-select v-model="userInfo.server" :size="globalSize" filterable placeholder="请选择美容师">
-                            <el-option v-for="item in testServer" :key="item.id" :label="item.name" :value="item.name"></el-option>
+                        <el-select v-model="billInfo.server_info" filterable remote :remote-method="fetchServerList" placeholder="请输入美容师姓名">
+                            <el-option v-for="item in serverList" :key="item.id" :label="item.name" :value="item"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="备注">
-                        <el-input type="textarea" v-model="userInfo.desc" :rows="2" :autosize="false"></el-input>
+                        <el-input type="textarea" v-model="billInfo.remark" :rows="2" :autosize="false"></el-input>
                     </el-form-item>
-                    <el-form-item label="卡内余额" :class="{'dis-visible': !(userInfo.userType == 2 && userInfo.info.isVip)}">
-                        <el-input disabled></el-input>
+                    <el-form-item label="卡内余额" :class="{'dis-visible': !billInfo.user_info.is_vip}">
+                        <el-input disabled v-model="billInfo.user_info.card_amount"></el-input>
                     </el-form-item>
-                    <el-form-item label="赠送金额" :class="{'dis-visible': !(userInfo.userType == 2 && userInfo.info.isVip)}">
-                        <el-input disabled></el-input>
+                    <el-form-item label="赠送金额" :class="{'dis-visible': !billInfo.user_info.is_vip}">
+                        <el-input disabled v-model="billInfo.user_info.present_amount"></el-input>
                     </el-form-item>
                 </el-form>
             </div>
@@ -73,9 +75,8 @@
             <span class="add-project-wrapper">
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addProject">项目服务</el-button>
                 <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addGoods">商品出售</el-button>
-                <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetMeal" :disabled="userInfo.userType == 1">套餐项目</el-button>
-                <el-button :size="globalSize" type="primary" round @click="buyCard" :disabled="!(userInfo.userType == 2 && userInfo.name && userInfo.server)">开卡服务</el-button>
-                <el-button :size="globalSize" type="primary" round @click="recharge" :disabled="!(userInfo.userType == 2 && userInfo.name && userInfo.server)">充值服务</el-button>
+                <el-button :size="globalSize" type="primary" icon="el-icon-plus" @click="addSetMeal" :disabled="billInfo.user_type == '1'">套餐项目</el-button>
+                <el-button :size="globalSize" type="primary" round @click="buyCard" :disabled="!(billInfo.user_info.name && billInfo.server_info.name)">开卡服务</el-button>
             </span>
             <el-table  border :size="globalSize" :data="consumeData" style="width: 100%;margin-top: 10px;" max-height="330">
                 <el-table-column prop="type" label="项目类别" width="200">
@@ -102,7 +103,7 @@
                 <el-table-column prop="server" label="美容师" width="200">
                     <template slot-scope="scope">
                         <el-select v-model="scope.row.server" :size="globalSize" filterable placeholder="请选择美容师">
-                            <el-option v-for="item in testServer" :key="item.id" :label="item.name" :value="item.name"></el-option>
+                            <el-option v-for="item in serverList" :key="item.id" :label="item.name" :value="item.name"></el-option>
                         </el-select>
                     </template>
                 </el-table-column>
@@ -111,7 +112,7 @@
                         <div>
                         <div v-if="scope.row.percent">
                             <el-select :size="globalSize" v-model="scope.row.percent.names" filterable placeholder="请选择美容师" multiple style="width:55%!important;">
-                                <el-option :disabled="scope.row.percent.names.length == 2" v-for="item in testServer" :key="item.id" :label="item.name" :value="item.name"></el-option>
+                                <el-option :disabled="scope.row.percent.names.length == 2" v-for="item in serverList" :key="item.id" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                             <el-input maxlength="1" :size="globalSize" style="width:15% !important;" v-model="scope.row.percent.num[0]"></el-input>
                             <span>/</span>
@@ -142,12 +143,13 @@
             </div>
         </div>
         <order-detail-dialog :config="orderDetailConf" @closed="closeOrderDetailDialog"/>
-        <buy-card-dialog :show.sync="buyCardConfVisible" :user_id="userInfo.info.id" :server_id="userInfo.server" @closed="closeBuyCardDialog" @topayment="showPaymentDialog"/>
-        <payment-dialog :show.sync="paymentVisible" :info="paymentInfo" @closed="closePaymentDialog" :type="paymentType"/>
+        <buy-card-dialog @closed="closeBuyCardDialog" @topayment="showPaymentDialog"/>
+        <payment-dialog @closed="closePaymentDialog" :type="paymentType"/>
     </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import loader from '@/mixins/loader'
 import OrderDetailDialog from '@/widget/orderDetail'
 import buyCardDialog from '@/widget/buyCard'
 import paymentDialog from '@/widget/payment'
@@ -159,32 +161,23 @@ export default {
         buyCardDialog,
         paymentDialog
     },
+    mixins: [loader],
     data() {
         return {
-            userInfo: {
-                userType: '1',
-                desc: '',
-                server: '',
-                info: {
-                    isVip: true,
-                    id: 0
-                }
+            billInfo: {
+                user_type: '1',
+                remark: '',
+                server_info: {},
+                user_info: {}
             },
             formRules: {
 
             },
             consumeData: [],
             localOrderList: [],
-            testServer: [{
-                id: 1,
-                name: '小李'
-            },{
-                id: 2,
-                name: '小张'
-            },{
-                id: 3,
-                name: '小欧'
-            }],
+            serverList: [],
+            goodsList: [],
+            userList: [],
             orderDetailConf: {
                 visible: false,
                 order: {
@@ -205,6 +198,27 @@ export default {
         ...mapGetters(['globalSize'])
     },
     methods: {
+        fetchServerList(name) {
+            this.get('getStaffList',{status: 1, page: 1, pageSize: 5, name}).then(res => {
+                if (!res.code) {
+                    this.serverList = res.data
+                }
+            })
+        },
+        fetchGoodsList(name) {
+            this.get('getGoodsList',{status: 1, page: 1, pageSize: 5, name}).then(res => {
+                if (!res.code) {
+                    this.goodsList = res.data
+                }
+            })
+        },
+        fetchUserList(name) {
+            this.get('getUserList',{status: 1, page: 1, pageSize: 5, name}).then(res => {
+                if (!res.code) {
+                    this.userList = res.data
+                }
+            })
+        },
         onUserTypeChange() {
             if (this.consumeData.length) {
                 this.consumeData = []

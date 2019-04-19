@@ -10,6 +10,9 @@
         <el-form-item required label="赠送金额" label-width="80px" prop="price">
             <el-input placeholder="请输入价格" width="60%" v-model="cardInfo.present_price"></el-input>
         </el-form-item>
+        <el-form-item required label="提成比例" label-width="80px" prop="ratio">
+            <el-input placeholder="请输入提成点" width="60%" v-model="cardInfo.ratio"></el-input>
+        </el-form-item>
         <el-form-item required label="激活" label-width="80px" prop="present_price">
             <el-switch v-model="cardInfo.status" active-color="#13ce66" inactive-color="#ff4949">
             </el-switch>
@@ -41,6 +44,7 @@ export default {
                 price: 0,
                 present_price: 0,
                 status: false,
+                ratio: 1,
                 remark: ''
             },
             formRules:{
@@ -52,6 +56,11 @@ export default {
                 price: [{
                     required: true,
                     message: '请填写价格',
+                    trigger: 'blur'
+                }],
+                ratio: [{
+                    required: true,
+                    message: '请填写提成点',
                     trigger: 'blur'
                 }]
             }

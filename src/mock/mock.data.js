@@ -128,6 +128,27 @@ export const setmeal = [{
     }]
 }]
 
+// export const billList = [{
+//     id: 1,
+//     name: '',
+//     user_type: 1,
+//     user_id: 1,
+//     server_id: 1,
+//     create_time: 0,
+//     update_time: 0,
+//     project: [{name: '', type: 'setmeal', info:{id: 1, name: '美甲',num: 1}, tc: 1, price: 0, ratio:[{server_id: 1, price: 100}]}],
+//     total: 100,
+//     card_minu: 0,
+//     pay_amount: 100,
+//     no_pay: 0,
+//     pay_type_detail: [{type: 'WECHAT', num: 100},
+//     {type: 'ALPAY', num: 0},
+//     {type: 'CASH', num: 0},
+//     {type: 'BANK_CARD', num: 0},
+//     {type: 'BALANCE', num: 0}],
+//     status: 1,
+//     remark: ''
+// }]
 export const setmealConsumeList = [{
     id: 1,
     user_id: 1,

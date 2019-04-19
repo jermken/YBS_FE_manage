@@ -16,10 +16,10 @@
                 <el-radio :label="2" disabled>否</el-radio>
             </el-radio-group>
         </el-form-item>
-        <el-form-item required label="生日" label-width="80px" prop="birthday">
+        <el-form-item label="生日" label-width="80px" prop="birthday">
             <el-date-picker type="date" v-model="userInfo.birthday" placeholder="请选择日期" format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
         </el-form-item>
-        <el-form-item required label="联系方式" label-width="80px" prop="tell">
+        <el-form-item label="联系方式" label-width="80px" prop="tell">
             <el-input placeholder="请输入手机号" width="60%" v-model="userInfo.tell"></el-input>
         </el-form-item>
         <el-form-item required label="卡内余额" label-width="80px" prop="card_amount">
@@ -57,7 +57,7 @@ export default {
                 name: '',
                 sexual: '1',
                 is_vip: 2,
-                birthday: '',
+                birthday: 0,
                 tell: '',
                 card_amount: 0,
                 present_amount: 0,
@@ -79,16 +79,6 @@ export default {
                     required: true,
                     message: '请选择性别',
                     trigger: 'change'
-                }],
-                birthday: [{
-                    required: true,
-                    message: '请选择出生日期',
-                    trigger: 'blur'
-                }],
-                tell: [{
-                    required: true,
-                    message: '请填写手机号码',
-                    trigger: 'blur'
                 }],
                 card_amount: [{
                     required: true,
@@ -137,6 +127,7 @@ export default {
                     if (this.userInfo.id) {
                         api = 'updateUser'
                     }
+                    this.userInfo.birthday = this.userInfo.birthday ? +new Date(this.userInfo.birthday) : 0
                     this.post(api, this.userInfo).then(res => {
                         if (!res.code) {
                             this.$message({
@@ -163,7 +154,7 @@ export default {
                 name: '',
                 sexual: '1',
                 is_vip: 2,
-                birthday: '',
+                birthday: 0,
                 tell: '',
                 card_amount: 0,
                 present_amount: 0,

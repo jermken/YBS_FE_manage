@@ -79,7 +79,6 @@ export default {
     },
     methods: {
         async fetchData() {
-            let params = obj || {}
             this.get('getGoodsList', this.queryInfo).then((res) => {
                 if (!res.code) {
                     this.goodsList = res.data

@@ -49,13 +49,13 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <div class="pagination-wrapper" v-if="isShowPagination">
+            <div class="pagination-wrapper" v-if="total">
                 <el-pagination
                     background
                     layout="prev, pager, next"
-                    :total="tableData.length"
-                    :page-size="pageSize"
-                    :current-page="page"
+                    :total="total"
+                    :page-size="queryInfo.pageSize"
+                    :current-page="queryInfo.page"
                     @current-change="pageChangeEvent">
                 </el-pagination>
             </div>
@@ -65,6 +65,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
+import loader from '@/mixins/loader'
 import AuditorDialog from '@/widget/auditor'
 
 export default {
@@ -72,27 +73,17 @@ export default {
     components: {
         AuditorDialog
     },
+    mixins: [loader],
     data() {
         return {
             queryInfo: {
                 name: '',
-                date: '2018-09-09'
+                date: '',
+                page: 1,
+                pageSize: 10
             },
-            tableData: [{
-                id: 1,
-                name: '李四李四',
-                date: '2018-09-08 12:34:50',
-                project: [{title: '洗脸'},{title: '美甲'},{title: '小气泡'},{title: '碧波庭'}],
-                total: '2000.00', 
-                card_minu: '500.00',
-                pay_amount: '1500.00',
-                no_pay: '0',
-                status: '1',
-                pay_type: [{title: '现金'}],
-                desc: '扣卡金额50元扣卡金额50元扣卡金额50元'
-            }],
-            page: 1,
-            pageSize: 10,
+            total: 0,
+            tableData: [],
             statusType: {
                 '1': {type: 'warning', title: '待审核'},
                 '2': {type: 'success', title: '已通过'},
@@ -112,18 +103,29 @@ export default {
     },
     methods: {
         queryData() {
-
+            this.queryInfo.page = 1;
+            this.fetchData()
         },
         fetchData() {
-
+            this.get('getBillList', this.queryInfo).then(res => {
+                if(!res.code) {
+                    this.tableData = res.data
+                    this.total = res.total
+                } else {
+                    this.$message({
+                        type: 'error',
+                        message: res.msg
+                    })
+                }
+            })
         },
-        pageChangeEvent() {
-
+        pageChangeEvent(val) {
+            this.queryInfo.page = val
+            this.fetchData()
         },
         toAuditor(id) {
             this.auditorDialogConf.visible = true
             this.auditorId = id
-            console.log(id, '审核中')
         },
         auditor(result) {
             let obj = {

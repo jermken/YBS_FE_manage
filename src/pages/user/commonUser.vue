@@ -22,7 +22,7 @@
                 <el-table-column prop="create_time" label="注册日期" width="150"></el-table-column>
                 <el-table-column  prop="sexual" label="性别" width="80">
                     <template slot-scope="scope">
-                        <span>{{scope.row.sexual === 1 ? '女' : '男'}}</span>
+                        <span>{{scope.row.sexual == '1' ? '女' : '男'}}</span>
                     </template>
                 </el-table-column>
                 <el-table-column  prop="tell" label="手机号" width="100"></el-table-column>
